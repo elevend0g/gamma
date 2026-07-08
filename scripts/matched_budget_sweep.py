@@ -30,6 +30,7 @@ from gamma.controls import make_shuffled_pairing
 from gamma.data import make_lens_train_and_gate_splits
 from gamma.lens import GammaLensV2, GammaLensV2State, train_tuned_lens
 from gamma.models import load_model
+from gamma.paths import unique_path
 from gamma.validate import collect_recurrent_states, collect_states, layer_metrics
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -143,9 +144,10 @@ def main():
         results["state"][budget] = {"real": real_m, "shuffled": shuf_m, "signal_above_floor": sig}
         print(f"[state] budget={budget} signal_above_floor={sig:.3f} ({time.time()-t0:.1f}s)")
 
-    with open(f"{out_dir}/sweep_results.json", "w") as f:
+    out_path = unique_path(out_dir, "sweep_results", "json")
+    with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"wrote {out_dir}/sweep_results.json")
+    print(f"wrote {out_path}")
 
 
 if __name__ == "__main__":

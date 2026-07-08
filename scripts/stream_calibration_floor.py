@@ -20,6 +20,7 @@ from gamma.controls import run_calibration_floor
 from gamma.data import make_lens_train_and_gate_splits
 from gamma.lens import GammaLensV2
 from gamma.models import load_model
+from gamma.paths import unique_path
 from gamma.validate import collect_states
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -59,9 +60,10 @@ def main():
     )
     print(f"[{args.model_name}] calibration floor done in {time.time()-t0:.1f}s")
 
-    with open(f"{out_dir}/calibration_floor_{stream}.json", "w") as f:
+    out_path = unique_path(out_dir, f"calibration_floor_{stream}", "json")
+    with open(out_path, "w") as f:
         json.dump({"stream": stream, **floor}, f, indent=2)
-    print(f"[{args.model_name}] wrote {out_dir}/calibration_floor_{stream}.json")
+    print(f"[{args.model_name}] wrote {out_path}")
 
 
 if __name__ == "__main__":

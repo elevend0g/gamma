@@ -2,10 +2,18 @@
 
 Usage: python scripts/run_phase0_model.py <model_name> [--seq-len 64] [--n-docs 64] [--steps 300]
 
-Saves, under reports/phase0/<model_name>/:
-  metrics.json   -- per-layer V1/V2 metrics (kl, top1_agree, entropy, ppl)
-  lens_v2.pt     -- trained tuned-lens weights for the primary stream
-  loss_curve.json -- V2 training KL loss per layer per step (subsampled)
+Saves, under reports/phase0/<model_name>/, each with a unique
+timestamp suffix so a rerun never overwrites a previous run's numbers
+(see gamma/paths.py):
+  metrics__<ts>.json    -- per-layer V1/V2 metrics (kl, top1_agree, entropy, ppl)
+  lens_v2__<ts>.pt      -- trained tuned-lens weights for the primary stream
+  loss_curve__<ts>.json -- V2 training KL loss per layer per step (subsampled)
+
+Note: reports/phase0/<model>/metrics.json etc. (no timestamp) are the
+original Phase 0 run's fixed-name outputs, already committed and
+referenced by path in reports/phase0_validation_report.md and
+reports/phase0_addendum_report.md. Left as-is; this script no longer
+writes to those exact paths.
 """
 
 import argparse
@@ -21,6 +29,7 @@ import torch
 from gamma.data import make_lens_train_and_gate_splits
 from gamma.lens import GammaLensV1, GammaLensV2, train_tuned_lens
 from gamma.models import load_model
+from gamma.paths import unique_path
 from gamma.validate import collect_states, layer_metrics
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -79,16 +88,17 @@ def main():
         metrics["v1"].append(layer_metrics(logits_v1, eval_data["final_logits"], eval_data["target_ids"]))
         metrics["v2"].append(layer_metrics(logits_v2, eval_data["final_logits"], eval_data["target_ids"]))
 
-    with open(f"{out_dir}/metrics.json", "w") as f:
+    metrics_path = unique_path(out_dir, "metrics", "json")
+    with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
 
-    v2.save(f"{out_dir}/lens_v2.pt")
+    v2.save(unique_path(out_dir, "lens_v2", "pt"))
 
     loss_summary = {l: hist[::max(1, len(hist)//50)] for l, hist in loss_history.items()}
-    with open(f"{out_dir}/loss_curve.json", "w") as f:
+    with open(unique_path(out_dir, "loss_curve", "json"), "w") as f:
         json.dump(loss_summary, f)
 
-    print(f"[{args.model_name}] wrote results to {out_dir}")
+    print(f"[{args.model_name}] wrote results to {out_dir} (metrics: {os.path.basename(metrics_path)})")
 
 
 if __name__ == "__main__":

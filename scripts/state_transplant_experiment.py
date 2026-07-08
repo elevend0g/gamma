@@ -22,6 +22,7 @@ import torch.nn.functional as F
 from gamma.data import load_pile_docs
 from gamma.models import load_model
 from gamma.patching import run_state_transplant
+from gamma.paths import unique_path
 from gamma.validate import tokenize_fixed_len
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -83,13 +84,14 @@ def main():
         "kl_by_continuation_step_gaussian": kl_gaussian.mean(dim=0).tolist(),
     }
 
-    with open(f"{out_dir}/transplant_results.json", "w") as f:
+    out_path = unique_path(out_dir, "transplant_results", "json")
+    with open(out_path, "w") as f:
         json.dump(summary, f, indent=2)
 
     print(f"mean KL  transplant={summary['mean_kl_transplant']:.4f}  gaussian={summary['mean_kl_gaussian']:.4f}")
     print(f"mean top1-changed  transplant={summary['mean_top1_changed_transplant']:.4f}  gaussian={summary['mean_top1_changed_gaussian']:.4f}")
     print(f"fraction of pairs where transplant KL > gaussian KL: {frac_transplant_larger:.3f}")
-    print(f"wrote {out_dir}/transplant_results.json")
+    print(f"wrote {out_path}")
 
 
 if __name__ == "__main__":

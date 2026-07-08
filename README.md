@@ -118,6 +118,19 @@ exceeds GitHub's 100MB hard limit. If reuse-without-retraining across
 machines becomes worth the ceremony, these belong in a GitHub Release
 artifact, not raw git blobs (repo history is forever; releases aren't).
 
+**Result files get unique names.** `gamma/paths.py::unique_path` appends
+a UTC timestamp to every result-writing script's output (`metrics__<ts>.json`,
+`sweep_results__<ts>.json`, etc.) so a rerun never silently overwrites a
+previous run's numbers — important once Amendment 4's multi-condition
+sweeps start producing many runs. The original Phase 0/Phase 1 result
+files (no timestamp suffix) are the specific runs already committed and
+referenced by path in the reports below; they're left alone rather than
+renamed retroactively, and the scripts that produced them no longer
+write to those exact paths. The plot scripts (`plot_state_pilot.py`,
+`plot_sweep.py`, `plot_transplant.py`) default to those original files
+(reproducing the exact committed figures) and take `--input` to point at
+a later, uniquely-named run instead.
+
 ## Running it
 
 ```
