@@ -48,6 +48,28 @@ artifact — separated by metric, the state path has a real (not zero),
 small, budget-flat top1/KL signal above floor, ~3-7x weaker than
 stream's. See Amendment 3.
 
+**Transplant triangulation (Amendment 4, revision 1):** a plot audit
+first caught two more Phase 0 bugs — Mamba's mixer output was being
+compared against Pythia's *residual stream* (different objects; fixed,
+Mamba's residual V2 now converges at the final layer like Pythia's does)
+and V1 perplexity was silently clamped to a ~1e13 ceiling. Both fixed,
+plus a corrected state-legibility re-slice (real signal at 18/24 layers,
+not 5/24, but flat with depth, not upper-band-concentrated as assumed) —
+[`reports/phase0_addendum_report.md`](reports/phase0_addendum_report.md)
+section 6, [`reports/state_legibility_reslice.md`](reports/state_legibility_reslice.md).
+Then the six-condition transplant triangulation itself:
+[`reports/phase1_transplant_five_condition.md`](reports/phase1_transplant_five_condition.md)
+(same-context integrity check passed exactly; disruption orders
+monotonically same<related<unrelated<permuted, p<0.0004 at both sizes)
+and [`reports/phase1_transplant_triangulation.md`](reports/phase1_transplant_triangulation.md)
+(state-corpus PCA: effective dimensionality is 0.01-1.1% of ambient,
+confirming P-A4-3; on-manifold noise disrupts like real-but-unrelated
+transplant, not like Gaussian, confirming P-A4-2; a continuous
+donor-recipient similarity measure predicts disruption far more finely
+than the same/related/unrelated categories did, Spearman ≈ −0.74 both
+sizes; a leverage regression testing *why* permutation damage is so
+seed-variable came back a clean null — reported as one, not massaged).
+
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the
 full ladder up to 7B — see Amendment 1. The dev machine has an RTX 3050

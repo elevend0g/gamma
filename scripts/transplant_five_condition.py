@@ -245,7 +245,7 @@ def main():
         "seed_variance": seed_variance,
         "ordering_test_P_A4_1": ordering_test,
         "permuted_vs_gaussian_auc_kl_diff_seed0": permuted_vs_gaussian_seed0,
-        "permuted_vs_gaussian_auc_kl_diff_pooled_3seed": permuted_vs_gaussian_pooled,
+        "permuted_vs_gaussian_auc_kl_diff_pooled_all_seeds": permuted_vs_gaussian_pooled,
     }
 
     suffix = "ssmconv" if args.include_conv else "primary"
@@ -263,7 +263,7 @@ def main():
               f"p={stat['p']:.4f} reject_null={stat['reject_null']}")
     print(f"\n[{args.model}] permuted vs gaussian auc_kl diff (seed 0 only): {permuted_vs_gaussian_seed0['mean']:.3f} "
           f"CI=[{permuted_vs_gaussian_seed0['ci_lo']:.3f},{permuted_vs_gaussian_seed0['ci_hi']:.3f}]")
-    print(f"[{args.model}] permuted vs gaussian auc_kl diff (pooled, 3 seeds x {args.n_pairs} pairs): "
+    print(f"[{args.model}] permuted vs gaussian auc_kl diff (pooled, {len(args.seeds)} seeds x {args.n_pairs} pairs): "
           f"{permuted_vs_gaussian_pooled['mean']:.3f} "
           f"CI=[{permuted_vs_gaussian_pooled['ci_lo']:.3f},{permuted_vs_gaussian_pooled['ci_hi']:.3f}] "
           f"p={permuted_vs_gaussian_pooled['p_one_sided']:.4f}")

@@ -134,13 +134,16 @@ class RecurrentStateExtractor:
         self.d_state = model.config.state_size
 
     @torch.no_grad()
-    def run(self, input_ids: torch.Tensor, layer_subset: list[int] | None = None) -> dict:
+    def run(self, input_ids: torch.Tensor, layer_subset: list[int] | None = None, snapshot_only: bool = False) -> dict:
         """input_ids: [batch, T]. Returns:
           state:  [T, L, batch, d_inner, d_state] -- genuine recurrent
                   state after processing each token (L = len(layer_subset)
-                  if given, else num_layers)
+                  if given, else num_layers). If snapshot_only, T=1 (only
+                  the final position is kept).
           logits: [batch, T, vocab] -- the model's own next-token logits
-                  at each position (for lens training/eval targets)
+                  at each position (for lens training/eval targets). Not
+                  computed if snapshot_only (nothing downstream needs
+                  per-step logits when only the final state matters).
 
         `layer_subset` keeps memory down for large batch x seq_len
         collection: storing all layers at every timestep for a big pool
@@ -148,6 +151,13 @@ class RecurrentStateExtractor:
         (each step is moved off-GPU immediately) and OOMs the host well
         before it OOMs the GPU. If only a few layers are needed (e.g. for
         a budget sweep), say so up front.
+
+        `snapshot_only` is the complementary fix for the opposite case:
+        collecting *all* layers (no subset possible, e.g. for PCA) but
+        only needing the state at the *end* of the prefix, not every
+        intermediate timestep -- avoids the same O(T) memory blowup by
+        simply not keeping timesteps you don't need, rather than trading
+        off which layers you keep.
         """
         layers = layer_subset if layer_subset is not None else list(range(self.num_layers))
         batch, seq_len = input_ids.shape
@@ -158,13 +168,19 @@ class RecurrentStateExtractor:
             step_ids = input_ids[:, t : t + 1]
             out = self.model(input_ids=step_ids, cache_params=cache, use_cache=True)
             cache = out.cache_params
+            if snapshot_only and t < seq_len - 1:
+                continue
             layer_states = torch.stack(
                 [cache.layers[l].recurrent_states.detach().clone() for l in layers],
                 dim=0,
             )  # [L, batch, d_inner, d_state]
             states.append(layer_states.cpu())
+            if snapshot_only:
+                continue
             logits_list.append(out.logits[:, -1, :].detach().cpu())  # [batch, vocab]
 
         state = torch.stack(states, dim=0)  # [T, L, batch, d_inner, d_state]
-        logits = torch.stack(logits_list, dim=1)  # [batch, T, vocab]
-        return {"state": state, "logits": logits}
+        result = {"state": state}
+        if logits_list:
+            result["logits"] = torch.stack(logits_list, dim=1)  # [batch, T, vocab]
+        return result

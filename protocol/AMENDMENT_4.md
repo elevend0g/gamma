@@ -318,3 +318,35 @@ smaller than the seed-0-only number alone suggested — permuted-real's
 seed variance at 130M is >3x Gaussian's, itself a finding worth carrying
 into Task 6/7's manifold analysis). Full numbers, plots, and the
 ssm+conv secondary-sweep delta: `reports/phase1_transplant_five_condition.md`.
+
+**Tasks 6-8 outcome (2026-07-08), full report `reports/phase1_transplant_triangulation.md`:**
+- **P-A4-3 (participation ratio): PASSED decisively**, both models,
+  every layer — 0.01-1.1% of ambient dimension, with a consistent depth
+  trend (dimensionality collapses further in the final few layers of
+  both models).
+- **P-A4-2 (on-manifold noise ≈ unrelated-real, ≠ Gaussian): PASSED**,
+  both models — on-manifold sits far closer to unrelated-real than to
+  Gaussian at both sizes (130M: +0.9 from unrelated vs. +4.6 from
+  Gaussian; 370M: statistically indistinguishable from unrelated, CI
+  includes zero, clearly excludes Gaussian).
+- **P-A4-4 (depth-localization): not tested this pass**, flagged
+  explicitly rather than skipped silently — requires a separate
+  full-scale lens-training pipeline beyond this pass's scope. Task 3's
+  pilot-scale finding (signal widespread, not upper-band-concentrated)
+  stands unconfirmed and unfalsified at the corpus's full scale.
+- **Leverage regression (permutation placement vs. PCA high-variance
+  dimensions): clean null**, both models, pooled and per-layer (|r| <
+  0.14 throughout) — the specific mechanism hypothesized doesn't explain
+  the seed-to-seed disruption variance seen in the >=10-seed permutation
+  distribution (which itself is confirmed heavy-tailed/bimodal, not
+  noise: ~7/12 seeds at 130M track Gaussian's range, a distinct subset
+  lands 2-4x higher). The per-layer PC1 structural map (which raw
+  `(d_inner, d_state)` coordinates dominate each layer's top variance
+  direction) is reported as a standalone deliverable regardless.
+- **Continuous relatedness regression**: donor-recipient stream-band
+  similarity predicts transplant disruption with Spearman r ≈ −0.74 at
+  both sizes — a substantially finer-grained and more informative result
+  than the same/related/unrelated categorical split alone.
+
+Adjudication of what any of this means for G1a/G1b remains reserved, per
+the standing project norm.
