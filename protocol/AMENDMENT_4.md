@@ -382,3 +382,17 @@ the standing project norm.
   (zero-intercept) fits exactly as well as the two-parameter model at
   both sizes (identical R²) — this is now stated as the law, not an
   approximation.
+
+**Phase 1 closeout (2026-07-08), full report `reports/phase1/echo_partialling.md`:**
+- **Echo-partialling: signal survives, both models.** Tested whether
+  P-A4-4's early-peaked, pervasive legibility signal is explainable by
+  input echo (target token already in the 16-token prefix; echo rate
+  19.8%). Excluding echo-explainable examples: 22/24 layers still
+  CI-supported at Mamba-130M (was 23/24), 42/48 at Mamba-370M (was
+  47/48); mean signal magnitude retained at 85-86% of the full-set
+  value, both sizes. **The legible slice is largely distinct from input
+  echo, not primarily explained by it** — this strengthens confidence
+  that the P-A4-4 floor is a genuine (if thin) compressed carry-forward
+  property, though it does not change P-A4-4's own already-settled
+  verdict (FAILED — the signal is pervasive and early-peaking, not
+  depth-localized, regardless of its echo status).

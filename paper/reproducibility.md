@@ -65,6 +65,18 @@ not hidden.
    made the state path's real top1/KL signal look like "no signal" —
    corrected by reporting KL and top1_agree separately, now a
    project-wide standing rule (Amendment 4 revision 1).
+4. **Permutation single-seed artifact** (`reports/phase1_transplant_five_condition.md`,
+   `protocol/AMENDMENT_4.md` Task 5 outcome): the first "permuted-real vs.
+   Gaussian" comparison at Mamba-130M used only seed 0, and reported
+   permuted-real as ~2x more disruptive than Gaussian (diff −15.5). Pooling
+   across 12 seeds cut that to −4.4 to −4.7 — still a real, CI-supported
+   effect, but roughly a third the size the single seed suggested. The
+   12-seed distribution itself turned out to be heavy-tailed/bimodal
+   (`reports/phase1_transplant_triangulation.md`), which is *why* seed 0
+   alone was misleading — it happened to be one of the high-disruption
+   outliers, not a representative draw. Headline single-seed numbers from
+   any stochastic condition in this project should be read as
+   provisional until a multi-seed figure is available alongside them.
 
 ## Per-experiment commands and seeds
 

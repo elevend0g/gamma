@@ -1,9 +1,12 @@
-"""Task 2 (Phase 1 closing pass): collect (state, final_logits, target_id)
-at every layer, matching Task 6's corpus snapshot convention (16-token
-prefix, state/logits at the last position), for full-scale P-A4-4 lens
-training. Task 6's corpus itself only has states (built for PCA, no
-paired targets) -- this is a separate collection with the same prefix
-convention plus the target needed to train/evaluate a lens.
+"""Task 2 (Phase 1 closing pass): collect (state, final_logits, target_id,
+prefix) at every layer, matching Task 6's corpus snapshot convention
+(16-token prefix, state/logits at the last position), for full-scale
+P-A4-4 lens training. Task 6's corpus itself only has states (built for
+PCA, no paired targets) -- this is a separate collection with the same
+prefix convention plus the target needed to train/evaluate a lens.
+`prefix` (the raw 16-token input) is kept so a later echo-partialling
+analysis can check whether a target token was already present in the
+prefix, without needing to re-tokenize documents from scratch.
 
 Train and eval pools use different document-pool seeds (9999 / 8888) so
 eval is genuinely held out, not just a different slice of the same draw.
@@ -50,7 +53,7 @@ def collect(model, spec, tokenizer, n_contexts: int, seed: int, batch_size: int 
 
     state = torch.cat(state_chunks, dim=1)  # [L, N, d_inner, d_state]
     final_logits = torch.cat(logit_chunks, dim=0)  # [N, V]
-    return {"state": state, "final_logits": final_logits, "target_ids": target_ids}
+    return {"state": state, "final_logits": final_logits, "target_ids": target_ids, "prefix": prefix}
 
 
 def main():

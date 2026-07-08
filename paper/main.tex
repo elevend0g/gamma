@@ -128,6 +128,27 @@ not as a band, at least. See \texttt{reports/phase1/state\_legibility\_depth\_fu
   \caption{\todojay{Caption: full-depth top1-above-floor signal, both models, 95\% CI per layer. Note layer-0 degeneracy (both models exactly zero) and the early-peak/gradual-decline shape.}}
 \end{figure}
 
+\todojay{\textbf{Echo-partialling check} (rules out the cheapest
+alternative explanation for the above): is the early-peaked signal just
+input echo (target token already present in the 16-token prefix)?
+Echo rate \EchoRatePctOneThreeM\ of eval examples (any-of-prefix
+definition), both models. Excluding echo-explainable examples:
+\NLayersNonEchoAboveFloorOneThreeM\ layers still CI-supported at
+Mamba-130M (down from \NLayersFullAboveFloorOneThreeM),
+\NLayersNonEchoAboveFloorThreeSevenM\ at Mamba-370M (down from
+\NLayersFullAboveFloorThreeSevenM) -- signal magnitude retained:
+\EchoRetainedPctOneThreeM\ / \EchoRetainedPctThreeSevenM. State the
+one-line result plainly: the legible slice is largely distinct from
+input echo, not primarily explained by it, at both sizes. See
+\texttt{reports/phase1/echo\_partialling.md} for the recent-\NRecentK\
+stricter definition (near-identical result) and the scope caveat (exact
+token-match echo only, not fuzzy/n-gram echo).}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/echo_partialling_plot.png}
+  \caption{\todojay{Caption: full eval set vs.\ non-echo subset, per-layer top1-above-floor, both models. Curves track closely at nearly every layer.}}
+\end{figure}
+
 \subsection{Manifold geometry: low dimensionality and terminal funneling}
 \label{sec:manifold}
 \todojay{Participation ratio \ParticipationRatioMinOneThreeM--\ParticipationRatioMaxOneThreeM\
@@ -226,12 +247,39 @@ unexplained bimodal permutation distribution, whether the shape/content
 ratio holds at larger scale (790M+, 3060-tier hardware).}
 
 \section{Limitations}
-\todojay{Small-tier only (130M/370M) on primary hardware; hardware
-deviation from protocol baseline (Amendment 1); Pile-10k substitute for
-original Pile; no custom CUDA kernels (sequential-scan fallback); N=32
-pairs per transplant condition; single-document held-out pools per
-experiment, not a fully partitioned k-fold scheme; leverage/critical-channel
-nulls tested only two operationalizations, not exhaustive.}
+\todojay{
+\begin{itemize}
+  \item Small-tier only (Mamba-130M/370M) on primary hardware; the
+  protocol's confirmatory ladder ($\geq$790M) is unrun on this 4GB card
+  -- an explicit, documented scope deviation (Amendment 1), not a claim
+  the pattern holds at scale.
+  \item Hardware deviation from the protocol's 12GB baseline (Amendment 1).
+  \item Pile-10k substitute for the original Pile (host down); a
+  shuffle-and-take draw per experiment, not a formally partitioned
+  k-fold held-out scheme -- stated in \texttt{paper/reproducibility.md},
+  not hidden.
+  \item No custom CUDA kernels; HF's pure-PyTorch sequential-scan
+  fallback throughout (slower, not wrong).
+  \item $N=32$ pairs per transplant condition; single fixed snapshot
+  position (token 16) per context for the state corpus and lens
+  training, not sampled across positions within a document.
+  \item State-corpus PCA's \texttt{dim\_99\%} figures approach the
+  corpus's own $N=1{,}200$ at several layers (values near 1{,}000--1{,}100)
+  -- likely underestimates, since SVD rank is capped near $N$;
+  \texttt{dim\_90\%} (what Task 7's on-manifold condition actually uses)
+  stays comfortably below $N$ everywhere and isn't subject to this caveat.
+  \item Leverage and critical-channel regressions tested two
+  operationalizations (broad PCA-subspace energy; narrow PC1--3-loading-ranked
+  coordinate subsets at $k=3,5,10$), both null -- not an exhaustive
+  search of possible mechanisms; the bimodal permutation-disruption
+  pattern remains unexplained.
+  \item Echo-partialling (\S\ref{sec:legibility}) rules out gross input-echo
+  as the primary driver of the legibility floor but was tested with one
+  echo definition (any-of-prefix and last-\NRecentK-tokens); a fuller
+  three-way echo/output-prediction/neither tagging of lens top-$k$
+  outputs, as protocol \S4.1 originally specified, was not attempted.
+\end{itemize}
+}
 
 \section{Reproducibility}
 See \texttt{paper/reproducibility.md} for exact commands, seeds,
