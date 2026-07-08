@@ -203,3 +203,131 @@ def run_state_transplant(
         "transplant_logits": transplant_logits.cpu(),
         "gaussian_logits": gaussian_logits.cpu(),
     }
+
+
+# --- General primitives for Task 5's five/six-condition transplant
+# (protocol/AMENDMENT_4.md revision 1) ---
+
+
+def get_state_snapshot(model, ids_prefix: torch.Tensor, layers: list[int], include_conv: bool = False) -> dict:
+    """Run ids_prefix through the model from an empty cache and return the
+    recurrent (and optionally conv) state at each layer in `layers` once
+    the whole prefix has been processed. Used to build donor snapshots
+    for related-context / unrelated-context (and, reused, for
+    same-context and gaussian, which both need a real reference state)."""
+    from transformers.cache_utils import DynamicCache
+
+    cache = DynamicCache(config=model.config)
+    with torch.no_grad():
+        for t in range(ids_prefix.shape[1]):
+            out = model(input_ids=ids_prefix[:, t : t + 1], cache_params=cache, use_cache=True)
+            cache = out.cache_params
+    snap = {}
+    for l in layers:
+        snap[l] = {
+            "recurrent": cache.layers[l].recurrent_states.detach().clone(),
+            "conv": cache.layers[l].conv_states.detach().clone() if include_conv else None,
+        }
+    return snap
+
+
+def permute_snapshot(snapshot: dict, layers: list[int], seed: int) -> dict:
+    """Fixed random permutation over the flattened (d_inner x d_state)
+    entries, per layer, same permutation applied across every pair in
+    the batch for a given seed. Preserves each pair's own marginal
+    statistics exactly (it's a bijection on that pair's own values);
+    destroys the learned spatial/structural relationships."""
+    g = torch.Generator().manual_seed(seed)
+    out = {}
+    for l in layers:
+        rec = snapshot[l]["recurrent"]  # [B, d_inner, d_state]
+        b, d_inner, d_state = rec.shape
+        flat = rec.reshape(b, -1)
+        perm = torch.randperm(flat.shape[1], generator=g).to(flat.device)
+        out[l] = {"recurrent": flat[:, perm].reshape(b, d_inner, d_state), "conv": snapshot[l]["conv"]}
+    return out
+
+
+def gaussian_snapshot_like(reference_snapshot: dict, layers: list[int], seed: int) -> dict:
+    """Per-layer mean/std-matched Gaussian noise, magnitude-matched to
+    `reference_snapshot` (conventionally the host's own real state at the
+    patch point) -- same logic as the calibration-floor Gaussian control,
+    applied causally instead of correlationally."""
+    g = torch.Generator().manual_seed(seed)
+    out = {}
+    for l in layers:
+        rec = reference_snapshot[l]["recurrent"]
+        mean, std = rec.mean(), rec.std().clamp_min(1e-6)
+        noise = (torch.randn(rec.shape, generator=g) * std.cpu() + mean.cpu()).to(rec.device)
+        out[l] = {"recurrent": noise, "conv": reference_snapshot[l]["conv"]}
+    return out
+
+
+def _run_prefix_cache(model, ids_prefix: torch.Tensor):
+    from transformers.cache_utils import DynamicCache
+
+    cache = DynamicCache(config=model.config)
+    for t in range(ids_prefix.shape[1]):
+        out = model(input_ids=ids_prefix[:, t : t + 1], cache_params=cache, use_cache=True)
+        cache = out.cache_params
+    return cache
+
+
+def _apply_patch(cache, layers: list[int], replacement: dict | None, include_conv: bool):
+    if replacement is None:
+        return
+    for l in layers:
+        cache.layers[l].recurrent_states = replacement[l]["recurrent"].clone().to(cache.layers[l].recurrent_states.dtype)
+        if include_conv and replacement[l]["conv"] is not None:
+            cache.layers[l].conv_states = replacement[l]["conv"].clone().to(cache.layers[l].conv_states.dtype)
+
+
+def greedy_continue(model, host_prefix_ids: torch.Tensor, continuation_len: int, layers: list[int],
+                     replacement: dict | None = None, include_conv: bool = False):
+    """Run host_prefix_ids, optionally patch state at `layers`, then
+    greedily generate continuation_len new tokens (feeding argmax back
+    in -- an actual autoregressive trajectory, not teacher-forced on
+    pre-existing text). Used to build the "baseline's own greedy
+    continuation" reference trajectory (replacement=None) that every
+    condition is then teacher-forced against.
+
+    Returns (generated_token_ids [B, continuation_len],
+    per_step_logits [B, continuation_len, V])."""
+    with torch.no_grad():
+        cache = _run_prefix_cache(model, host_prefix_ids)
+        _apply_patch(cache, layers, replacement, include_conv)
+
+        cur_token = host_prefix_ids[:, -1:]
+        gen_tokens, logits_list = [], []
+        for _ in range(continuation_len):
+            out = model(input_ids=cur_token, cache_params=cache, use_cache=True)
+            cache = out.cache_params
+            logits = out.logits[:, -1, :]
+            logits_list.append(logits.detach())
+            cur_token = logits.argmax(-1, keepdim=True)
+            gen_tokens.append(cur_token)
+    return torch.cat(gen_tokens, dim=1), torch.stack(logits_list, dim=1)
+
+
+def teacher_force_continue(model, host_prefix_ids: torch.Tensor, forced_tokens: torch.Tensor, layers: list[int],
+                            replacement: dict | None = None, include_conv: bool = False) -> torch.Tensor:
+    """Run host_prefix_ids, optionally patch state at `layers`, then feed
+    `forced_tokens` (e.g. baseline's own greedy continuation) via teacher
+    forcing rather than generating autoregressively. Returns per-step
+    logits [B, len(forced_tokens), V] -- logits_list[t] is this
+    (possibly patched) model's prediction for forced_tokens[:, t], given
+    forced_tokens[:, :t] as history. Directly comparable, position by
+    position, to another condition's teacher-forced run on the same
+    forced_tokens (that's the point: same reference trajectory, only the
+    state differs)."""
+    with torch.no_grad():
+        cache = _run_prefix_cache(model, host_prefix_ids)
+        _apply_patch(cache, layers, replacement, include_conv)
+
+        input_seq = torch.cat([host_prefix_ids[:, -1:], forced_tokens[:, :-1]], dim=1)
+        logits_list = []
+        for t in range(input_seq.shape[1]):
+            out = model(input_ids=input_seq[:, t : t + 1], cache_params=cache, use_cache=True)
+            cache = out.cache_params
+            logits_list.append(out.logits[:, -1, :].detach())
+    return torch.stack(logits_list, dim=1)

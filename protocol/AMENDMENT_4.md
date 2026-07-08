@@ -301,7 +301,20 @@ Task 0 (original pre-registration, `pre-registration-v4`) → Tasks 1-3
 (plot-audit fixes: cross-arch object mismatch, ppl saturation, state
 legibility re-slice — complete, reported above and in
 `reports/phase0_addendum_report.md` / `reports/state_legibility_reslice.md`)
-→ **Task 4 (this document, revision 1 + tag `pre-registration-v4-r2`) —
-stop, await explicit approval** → Task 5 (five-condition transplant) →
-Task 6 (state corpus + PCA) → Task 7 (sixth condition, on-manifold
-noise) → Task 8 (report, `reports/phase1_transplant_triangulation.md`).
+→ Task 4 (this document, revision 1 + tag `pre-registration-v4-r2`) →
+**Task 5 (five-condition transplant — complete, approved and run;
+`reports/phase1_transplant_five_condition.md`)** → Task 6 (state corpus
++ PCA) → Task 7 (sixth condition, on-manifold noise) → Task 8 (report,
+`reports/phase1_transplant_triangulation.md`).
+
+**Task 5 outcome (2026-07-08):** same-context integrity check passed
+exactly (0.000 disruption, both models). P-A4-1 part 1 (monotonic
+ordering same<related<unrelated<permuted) **PASSED** at both sizes,
+Holm-Bonferroni corrected, p<0.0004 on every one of 6 links (3 links x 2
+models). P-A4-1 part 2 (permuted-real ≈ Gaussian) is model-size-
+dependent and scored **SURPRISE**: holds at 370M, fails at 130M (real,
+pooled-across-3-seeds excess disruption from permutation, though far
+smaller than the seed-0-only number alone suggested — permuted-real's
+seed variance at 130M is >3x Gaussian's, itself a finding worth carrying
+into Task 6/7's manifold analysis). Full numbers, plots, and the
+ssm+conv secondary-sweep delta: `reports/phase1_transplant_five_condition.md`.
