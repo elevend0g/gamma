@@ -17,6 +17,7 @@ COLORS = {"same_context": "tab:blue", "related_context": "tab:orange", "unrelate
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=["mamba-130m", "mamba-370m"])
+    ap.add_argument("--dpi", type=int, default=120)
     args = ap.parse_args()
 
     fig, axes = plt.subplots(1, len(args.models), figsize=(7 * len(args.models), 5))
@@ -40,7 +41,7 @@ def main():
     fig.suptitle("Continuous donor-recipient relatedness vs. transplant disruption")
     fig.tight_layout()
     out = unique_path("/home/jay/gamma/reports/phase1/relatedness_regression", "relatedness_plot", "png")
-    fig.savefig(out, dpi=120)
+    fig.savefig(out, dpi=args.dpi)
     print(f"wrote {out}")
 
 

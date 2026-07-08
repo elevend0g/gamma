@@ -1,0 +1,240 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Auto-generated macros -- every number in this document should come from
+% here, not be hand-typed. Regenerate with: python paper/extract_numbers.py
+\input{numbers.tex}
+
+% Visible marker for anything the agent scaffolded structurally but did
+% not write the interpretive content for. Search-and-destroy before
+% submission; every instance is something Jay writes.
+\newcommand{\todojay}[1]{\textcolor{red}{\textbf{TODO(jay):} #1}}
+
+\title{Closed-Loop Architectural Proprioception in Pretrained \\ State-Space Models}
+\author{Jay Noon}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\todojay{Abstract. Should state: (1) the question -- does a
+vocabulary-anchored introspective workspace, found in transformers,
+exist in pretrained SSMs, and does it extend to the object that persists
+across time; (2) the two-instrument answer -- stream is vocab-anchored
+(G1a), genuine recurrent state is not (G1b), but is structured and
+causally load-bearing; (3) the headline quantitative results: thin
+saturating legibility signal, disruption law $d = k(1-\mathrm{sim})$,
+shape/content decomposition (\ShapeShareOneThreeM/\ShapeShareThreeSevenM\
+of transplant disruption is generic manifold membership, not content),
+participation ratio \ParticipationRatioMinOneThreeM--\ParticipationRatioMaxOneThreeM\
+of ambient dimension; (4) reproducibility claim -- entire study runs on
+a 4GB consumer laptop GPU.}
+\end{abstract}
+
+\section{Introduction}
+\todojay{Motivate from protocol/gamma\_protocol.md \S1: Project Beta's
+recurrent-state anticipation result + Anthropic's transformer workspace
+result, composed. State the G1a/G1b split (Amendment 2) as the paper's
+organizing move -- stream vs. genuine state are different objects with
+different answers, and that dissociation is itself the finding, not a
+methodological footnote.}
+
+\section{Background}
+\todojay{Related work stubs -- fill in citations:}
+\begin{itemize}
+  \item \todojay{Anthropic, \emph{Emergent Introspective Workspace} (transformer-circuits.pub, 2026) -- the motivating transformer result.}
+  \item \todojay{Logit lens (nostalgebraist) and tuned lens (Belrose et al. 2023) -- V1/V2 readout methodology.}
+  \item \todojay{Mamba / SSM architecture background (Gu \& Dao) -- $d_\mathrm{inner} \times d_\mathrm{state}$ recurrent state, selective scan.}
+  \item \todojay{Activation/outlier-channel literature in transformer quantization -- relevant framing for \S\ref{sec:critical-channel}'s null result, cited as context only (Task 1 of the closing pass did not validate a critical-channel effect, so this is discussed as a considered-and-ruled-out alternative, not a confirmed parallel).}
+\end{itemize}
+
+\section{Methods}
+\subsection{Checkpoint matrix and hardware}
+\todojay{Mamba-130M/370M primary, Pythia-160M/410M comparators (matched
+Pile pretraining). RTX 3050, 4GB VRAM -- state the deviation from the
+protocol's 12GB baseline explicitly (Amendment 1) and the accessibility
+framing this enables.}
+
+\subsection{State extraction: stream vs.\ genuine state}
+\todojay{\texttt{StreamExtractor} (residual $x$, mixer output) vs.\
+\texttt{RecurrentStateExtractor} (genuine \texttt{recurrent\_states} via
+cached step-by-step decoding). Amendment 2's correction: what was
+originally called $h_t^{(l)}$ was the mixer's per-token output, not the
+persistent state.}
+
+\subsection{Gamma-lens: V1 (zero-shot) and V2 (tuned)}
+\todojay{Formula, training procedure (KL-to-final-logits loss,
+identity-initialized residual affine for V2 on hidden-size-shaped
+streams; low-rank readout \texttt{GammaLensV2State} for the
+dimensionality-mismatched genuine state).}
+
+\subsection{Calibration floors}
+\todojay{Shuffled-target and Gaussian-matched controls
+(\texttt{gamma/controls.py}) -- why a trained affine can manufacture
+apparent decodability, and how these floors rule that out.}
+
+\subsection{Transplant harness and the six conditions}
+\todojay{\texttt{gamma/patching.py}: \texttt{get\_state\_snapshot},
+\texttt{greedy\_continue}, \texttt{teacher\_force\_continue},
+\texttt{permute\_snapshot}, \texttt{gaussian\_snapshot\_like},
+\texttt{sample\_on\_manifold\_noise}. Six conditions: same-context,
+related-context, unrelated-context, permuted-real, Gaussian,
+on-manifold noise. Metrics: KL(baseline $\Vert$ transplanted), NLL of
+baseline's own greedy continuation under the transplanted state.}
+
+\section{Results}
+
+\subsection{Cross-architecture depth-axis mapping (corrected)}
+\label{sec:depth-axis}
+\todojay{Figure: \texttt{depth\_axis\_corrected.png} for both Mamba
+sizes, alongside Pythia's. State the object-mismatch erratum plainly:
+original comparison used Mamba mixer-output vs.\ Pythia residual stream
+(different objects); corrected residual-vs-residual comparison shows
+Mamba's V2 lens converging at the final layer (KL$\to$0, top1$\to$0.87--0.97)
+matching Pythia's pattern.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.48\textwidth]{figures/mamba-130m_depth_axis_corrected.png}
+  \includegraphics[width=0.48\textwidth]{figures/mamba-370m_depth_axis_corrected.png}
+  \caption{\todojay{Caption: corrected residual-stream depth-axis comparison, both Mamba sizes.}}
+\end{figure}
+
+\subsection{State legibility: thin, pervasive, and early-peaking, not depth-localized}
+\label{sec:legibility}
+\todojay{P-A4-4 (depth-localization of the state's argmax-legible
+signal) is \textbf{falsified at full scale, both models} --
+$N=800$ train / $400$ eval, all layers, both Mamba sizes
+(\texttt{scripts/state\_legibility\_depth\_full.py}). Signal is
+pervasive (\NLayersAboveFloorOneThreeM\ layers CI-supported at
+Mamba-130M, \NLayersAboveFloorThreeSevenM\ at Mamba-370M -- 87.5\% and
+83.3\% of all layers respectively), the depth trend is
+\emph{negative} at both sizes (Spearman \DepthTrendTop1OneThreeM\ /
+\DepthTrendTop1ThreeSevenM, opposite the sign P-A4-4 required), and the
+peak is layer \PeakLayerOneThreeM\ of 24 and layer \PeakLayerThreeSevenM\
+of 48 respectively -- the same absolute layer index in both models
+despite a 2$\times$ depth difference, itself worth a sentence. State
+plainly that this directly falsifies the Amendment 4 margin note's
+``state channel = stream's workspace band, lower bandwidth'' reading --
+not as a band, at least. See \texttt{reports/phase1/state\_legibility\_depth\_full.md}.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/state_legibility_depth_full.png}
+  \caption{\todojay{Caption: full-depth top1-above-floor signal, both models, 95\% CI per layer. Note layer-0 degeneracy (both models exactly zero) and the early-peak/gradual-decline shape.}}
+\end{figure}
+
+\subsection{Manifold geometry: low dimensionality and terminal funneling}
+\label{sec:manifold}
+\todojay{Participation ratio \ParticipationRatioMinOneThreeM--\ParticipationRatioMaxOneThreeM\
+of ambient dimension (Mamba-130M, $N=\NContextsOneThreeM$ held-out
+contexts), \ParticipationRatioMinThreeSevenM--\ParticipationRatioMaxThreeSevenM\
+(Mamba-370M). State the depth trend: dimensionality collapses sharply
+in the final few layers of both models (``terminal funneling'') --
+this is a real, reportable structural finding independent of anything
+downstream.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/leverage_scatter.png}
+  \caption{\todojay{Caption -- consider swapping for a dedicated participation-ratio-by-depth figure rather than the leverage scatter, which belongs in \S\ref{sec:critical-channel} instead.}}
+\end{figure}
+
+\subsection{Transplant ordering and the disruption law}
+\label{sec:ordering}
+\todojay{Monotonic ordering same $<$ related $<$ unrelated $<$ permuted,
+Holm-Bonferroni corrected, $p<0.0004$ on all 6 links (3 links $\times$ 2
+models). AUC-KL by condition:}
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Condition & Mamba-130M & Mamba-370M \\
+\midrule
+same-context     & \AucKlSameContextOneThreeM & \AucKlSameContextThreeSevenM \\
+related-context  & \AucKlRelatedOneThreeM & \AucKlRelatedThreeSevenM \\
+unrelated-context& \AucKlUnrelatedOneThreeM & \AucKlUnrelatedThreeSevenM \\
+on-manifold noise& \AucKlOnManifoldOneThreeM & \AucKlOnManifoldThreeSevenM \\
+Gaussian         & \AucKlGaussianOneThreeM & \AucKlGaussianThreeSevenM \\
+permuted-real    & \AucKlPermutedOneThreeM & \AucKlPermutedThreeSevenM \\
+\bottomrule
+\end{tabular}
+\caption{AUC-KL disruption by condition, seed 0, both models (paired, same pairs/baseline).}
+\end{table}
+
+\todojay{State the disruption law: $\mathrm{disruption} = k(1-\mathrm{similarity})$,
+zero-intercept fit costs nothing vs.\ two-parameter OLS
+(Pearson $r=$\PearsonROneThreeM/\PearsonRThreeSevenM, Spearman
+$r=$\SpearmanROneThreeM/\SpearmanRThreeSevenM). This is the paper's
+quantitative spine -- state it as such.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/relatedness_plot.png}
+  \caption{\todojay{Caption: continuous donor-recipient similarity vs.\ disruption, both models, with zero-intercept fit line.}}
+\end{figure}
+
+\subsection{Shape vs.\ content decomposition}
+\label{sec:shape-content}
+\todojay{Gaussian$\to$on-manifold gap (\GaussianMinusOnManifoldOneThreeM/\GaussianMinusOnManifoldThreeSevenM)
+vs.\ on-manifold$\to$unrelated gap (\OnManifoldMinusUnrelatedOneThreeM/\OnManifoldMinusUnrelatedThreeSevenM):
+shape accounts for \ShapeShareOneThreeM/\ShapeShareThreeSevenM\ of the
+total gap, both models. State the convergence with \S\ref{sec:legibility}'s
+correlational instrument -- two independent methods agreeing on
+``mostly form, thinly content'' is the interpretive payoff.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/six_condition_bars.png}
+  \caption{\todojay{Caption: all six conditions, paired, both models.}}
+\end{figure}
+
+\subsection{Critical-channel structure and the leverage null}
+\label{sec:critical-channel}
+\todojay{The 12-seed permutation distribution at Mamba-130M is
+heavy-tailed/bimodal (most realizations track Gaussian's range, a
+subset is 2--4$\times$ more disruptive). Broad PCA-subspace leverage
+regression: null (Pearson $r=$\LeveragePearsonOneThreeM/\LeveragePearsonThreeSevenM).
+Narrow critical-channel (top-PC1-3-loading coordinates) regression:
+\emph{also} null, at every $k$ tested (3, 5, 10) -- report as a second
+null, per \texttt{reports/phase1/critical\_channel\_check.md}. The
+per-layer PC1 structural map (which raw coordinates dominate each
+layer's top variance direction) stands as an independent descriptive
+deliverable regardless of the null regression.}
+
+\subsection{Provenance blindness}
+\label{sec:provenance}
+\todojay{Neutral characterization from \texttt{reports/phase1\_transplant\_triangulation.md}'s
+``Provenance blindness'' section: the state accepts syntactically valid
+foreign content far more readily than equal-magnitude noise, continuously
+scaling with donor similarity; this is a characterization of the
+undefended baseline, not a claim about exploitability or what any
+deployed system does. Frame for AI-security relevance without
+overclaiming.}
+
+\section{Discussion}
+\todojay{Full discussion -- Jay's voice. Suggested throughlines: (1) the
+G1a/G1b dissociation as evidence stream and genuine state are different
+kinds of object, not degrees of the same thing; (2) what ``mostly form,
+thinly content'' implies for the interoceptive-loop design (protocol
+\S6) -- the loop's ``leaning + certainty'' readout is exactly top-1-shaped,
+matching the state's own native legibility shape (see Amendment 4's
+margin note) -- lucky coincidence or the same architectural floor
+showing up twice; (3) what remains open: P-A4-4's status, the
+unexplained bimodal permutation distribution, whether the shape/content
+ratio holds at larger scale (790M+, 3060-tier hardware).}
+
+\section{Limitations}
+\todojay{Small-tier only (130M/370M) on primary hardware; hardware
+deviation from protocol baseline (Amendment 1); Pile-10k substitute for
+original Pile; no custom CUDA kernels (sequential-scan fallback); N=32
+pairs per transplant condition; single-document held-out pools per
+experiment, not a fully partitioned k-fold scheme; leverage/critical-channel
+nulls tested only two operationalizations, not exhaustive.}
+
+\section{Reproducibility}
+See \texttt{paper/reproducibility.md} for exact commands, seeds,
+checkpoint revisions, and the pre-registration/erratum trail.
+
+\end{document}

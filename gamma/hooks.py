@@ -175,9 +175,10 @@ class RecurrentStateExtractor:
                 dim=0,
             )  # [L, batch, d_inner, d_state]
             states.append(layer_states.cpu())
-            if snapshot_only:
-                continue
             logits_list.append(out.logits[:, -1, :].detach().cpu())  # [batch, vocab]
+            # (snapshot_only reaches this line only once, at the final t, via the
+            # early-continue above -- so logits are correctly paired with the one
+            # state snapshot kept, not silently dropped as in earlier versions.)
 
         state = torch.stack(states, dim=0)  # [T, L, batch, d_inner, d_state]
         result = {"state": state}

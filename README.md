@@ -70,6 +70,25 @@ than the same/related/unrelated categories did, Spearman ≈ −0.74 both
 sizes; a leverage regression testing *why* permutation damage is so
 seed-variable came back a clean null — reported as one, not massaged).
 
+**Phase 1 closing pass:** three follow-ups plus a preprint scaffold.
+(1) [`reports/phase1/critical_channel_check.md`](reports/phase1/critical_channel_check.md) —
+refined the leverage null to narrow, PC1-3-loading-ranked coordinate
+subsets; still null at every k tested (3, 5, 10), reported as a second
+null rather than a third attempt. (2) [`reports/phase1/state_legibility_depth_full.md`](reports/phase1/state_legibility_depth_full.md) —
+P-A4-4 (depth-localization) tested at full scale (N=800/400, all layers,
+both models): **falsified decisively** — 87.5%/83.3% of layers show
+signal, depth trend is negative at both sizes, peak is layer 3 of 24 and
+layer 3 of 48. The state's thin legible signal is pervasive and
+early-peaking, not a workspace-band analog. (3) [`reports/phase1/convergent_synthesis.md`](reports/phase1/convergent_synthesis.md) —
+the causal (shape/content decomposition) and correlational (legibility
+signal ratio) instruments converge on "mostly form, thinly content"
+(shape ≈78-83% of transplant disruption, both sizes); the disruption law
+`d = k(1−similarity)` fits exactly as well with zero intercept as with
+two free parameters, at both sizes — stated as the law, not an
+approximation. A LaTeX preprint scaffold assembling all of this
+(structure and sourced numbers only, no agent-authored interpretation)
+lives in [`paper/`](paper/main.tex); see [`paper/reproducibility.md`](paper/reproducibility.md).
+
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the
 full ladder up to 7B — see Amendment 1. The dev machine has an RTX 3050

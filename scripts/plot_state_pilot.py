@@ -30,6 +30,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", default=DEFAULT_INPUT)
     ap.add_argument("--output", default=None, help="Defaults to the original fixed name if --input is also default; otherwise a unique name.")
+    ap.add_argument("--dpi", type=int, default=120)
     args = ap.parse_args()
 
     d = json.load(open(args.input))
@@ -55,7 +56,7 @@ def main():
         out = DEFAULT_OUTPUT
     else:
         out = unique_path(os.path.dirname(args.input), "state_vs_floor", "png")
-    fig.savefig(out, dpi=120)
+    fig.savefig(out, dpi=args.dpi)
     print(f"wrote {out}")
 
 

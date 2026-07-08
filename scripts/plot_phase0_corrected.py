@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 BASE = "/home/jay/gamma/reports/phase0"
 
 
-def plot_pair(name, path_x, path_mixer, out_path):
+def plot_pair(name, path_x, path_mixer, out_path, dpi=120):
     m_x = json.load(open(path_x))
     m_mixer = json.load(open(path_mixer))
     layers = list(range(m_x["num_layers"]))
@@ -40,7 +40,7 @@ def plot_pair(name, path_x, path_mixer, out_path):
             ax.legend()
     fig.suptitle(f"{name} -- corrected cross-architecture comparison object + ppl fix")
     fig.tight_layout()
-    fig.savefig(out_path, dpi=120)
+    fig.savefig(out_path, dpi=dpi)
     plt.close(fig)
     print(f"wrote {out_path}")
 
@@ -51,10 +51,11 @@ def main():
     ap.add_argument("--mamba130-mixer", required=True)
     ap.add_argument("--mamba370-x", required=True)
     ap.add_argument("--mamba370-mixer", required=True)
+    ap.add_argument("--dpi", type=int, default=120)
     args = ap.parse_args()
 
-    plot_pair("mamba-130m", args.mamba130_x, args.mamba130_mixer, f"{BASE}/mamba-130m/depth_axis_corrected.png")
-    plot_pair("mamba-370m", args.mamba370_x, args.mamba370_mixer, f"{BASE}/mamba-370m/depth_axis_corrected.png")
+    plot_pair("mamba-130m", args.mamba130_x, args.mamba130_mixer, f"{BASE}/mamba-130m/depth_axis_corrected.png", dpi=args.dpi)
+    plot_pair("mamba-370m", args.mamba370_x, args.mamba370_mixer, f"{BASE}/mamba-370m/depth_axis_corrected.png", dpi=args.dpi)
 
 
 if __name__ == "__main__":

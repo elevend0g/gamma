@@ -21,6 +21,7 @@ def latest(pattern):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=["mamba-130m", "mamba-370m"])
+    ap.add_argument("--dpi", type=int, default=120)
     args = ap.parse_args()
 
     # leverage scatter
@@ -36,7 +37,7 @@ def main():
     fig.suptitle("Leverage regression: no relationship between PCA-subspace energy and permutation disruption")
     fig.tight_layout()
     out1 = unique_path("/home/jay/gamma/reports/phase1/leverage_regression", "leverage_scatter", "png")
-    fig.savefig(out1, dpi=120)
+    fig.savefig(out1, dpi=args.dpi)
     print(f"wrote {out1}")
 
     # six-condition bar chart
@@ -57,7 +58,7 @@ def main():
     fig2.suptitle("Six conditions, directly comparable (same pairs, same baseline, seed 0)")
     fig2.tight_layout()
     out2 = unique_path("/home/jay/gamma/reports/phase1/transplant_five_condition", "six_condition_bars", "png")
-    fig2.savefig(out2, dpi=120)
+    fig2.savefig(out2, dpi=args.dpi)
     print(f"wrote {out2}")
 
 

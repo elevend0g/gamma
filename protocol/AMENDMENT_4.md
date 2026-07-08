@@ -350,3 +350,35 @@ ssm+conv secondary-sweep delta: `reports/phase1_transplant_five_condition.md`.
 
 Adjudication of what any of this means for G1a/G1b remains reserved, per
 the standing project norm.
+
+**Phase 1 closing pass (2026-07-08), full reports `reports/phase1/critical_channel_check.md`,
+`reports/phase1/state_legibility_depth_full.md`, `reports/phase1/convergent_synthesis.md`:**
+- **P-A4-4: FAILED, decisively, at full scale (N=800/400, both models,
+  all layers)** — not the marginal pilot-scale hint, a clean refutation.
+  21/24 (Mamba-130M) and 40/48 (Mamba-370M) layers show CI-supported
+  signal (87.5% / 83.3% of all layers); depth-trend Spearman is
+  **negative** at both sizes (−0.39, −0.57), the opposite sign
+  P-A4-4 required; peak is layer 3 of 24 and layer 3 of 48 respectively
+  — near the start, not late, and the same absolute layer index despite
+  a 2x depth difference. The state's thin legible signal is an
+  early-emerging, pervasive, gradually-declining property present at
+  nearly every depth, not a localized band. This directly falsifies the
+  "state channel = stream's workspace band, lower bandwidth" reading the
+  margin note flagged as one live possibility — it does not hold, at
+  least not as a depth-localized band.
+- **Critical-channel refinement of the leverage null: still null.**
+  Narrower, PC1-3-loading-ranked coordinate subsets (k=3,5,10) tested
+  against the same 12-seed permutation distribution — no clean
+  separation between the 3 high-disruption and 9 low-disruption seeds at
+  any k. The bimodal permutation-disruption pattern remains unexplained;
+  reported as a second null rather than a third operationalization
+  attempted this pass.
+- **Shape/content convergence, formalized:** the causal decomposition
+  (Gaussian→on-manifold vs. on-manifold→unrelated gaps) puts shape's
+  share of total disruption at 82.6% (130M) / 77.9% (370M) — consistent
+  with the correlational instrument's "state carries ~15-30% of stream's
+  legible signal." Two independent methods now agree: mostly form,
+  thinly content. The disruption law `d = k(1-\mathrm{similarity})`
+  (zero-intercept) fits exactly as well as the two-parameter model at
+  both sizes (identical R²) — this is now stated as the law, not an
+  approximation.
