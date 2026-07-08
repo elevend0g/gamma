@@ -134,13 +134,22 @@ class RecurrentStateExtractor:
         self.d_state = model.config.state_size
 
     @torch.no_grad()
-    def run(self, input_ids: torch.Tensor) -> dict:
+    def run(self, input_ids: torch.Tensor, layer_subset: list[int] | None = None) -> dict:
         """input_ids: [batch, T]. Returns:
           state:  [T, L, batch, d_inner, d_state] -- genuine recurrent
-                  state after processing each token
+                  state after processing each token (L = len(layer_subset)
+                  if given, else num_layers)
           logits: [batch, T, vocab] -- the model's own next-token logits
                   at each position (for lens training/eval targets)
+
+        `layer_subset` keeps memory down for large batch x seq_len
+        collection: storing all layers at every timestep for a big pool
+        is O(batch * T * num_layers * d_inner * d_state) in *system* RAM
+        (each step is moved off-GPU immediately) and OOMs the host well
+        before it OOMs the GPU. If only a few layers are needed (e.g. for
+        a budget sweep), say so up front.
         """
+        layers = layer_subset if layer_subset is not None else list(range(self.num_layers))
         batch, seq_len = input_ids.shape
         cache = DynamicCache(config=self.model.config)
         states, logits_list = [], []
@@ -150,7 +159,7 @@ class RecurrentStateExtractor:
             out = self.model(input_ids=step_ids, cache_params=cache, use_cache=True)
             cache = out.cache_params
             layer_states = torch.stack(
-                [cache.layers[l].recurrent_states.detach().clone() for l in range(self.num_layers)],
+                [cache.layers[l].recurrent_states.detach().clone() for l in layers],
                 dim=0,
             )  # [L, batch, d_inner, d_state]
             states.append(layer_states.cpu())

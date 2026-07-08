@@ -3,7 +3,7 @@ message: "If you use this software or its results, please cite it as below."
 title: "Project Gamma: Closed-Loop Architectural Proprioception in Pretrained State-Space Models"
 type: software
 authors:
-  - name: "Jay"
+  - name: "Noon"
     email: jay@elevendog.com
     alias: elevend0g
 repository-code: "https://github.com/elevend0g/gamma"

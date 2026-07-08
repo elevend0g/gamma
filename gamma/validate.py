@@ -53,14 +53,19 @@ def collect_states(model, spec, tokenizer, docs: list[str], seq_len: int = 64, b
 
 
 @torch.no_grad()
-def collect_recurrent_states(model, spec, tokenizer, docs: list[str], seq_len: int = 48, batch_size: int = 16, device: str = "cuda") -> dict:
+def collect_recurrent_states(model, spec, tokenizer, docs: list[str], seq_len: int = 48, batch_size: int = 16, device: str = "cuda", layer_subset: list[int] | None = None) -> dict:
     """Genuine recurrent state h_t^(l), via RecurrentStateExtractor
     (step-by-step cached decoding -- see gamma/hooks.py). Slower than
     collect_states by construction: O(seq_len) forward calls per batch of
     documents instead of one batched call.
 
+    `layer_subset` (see RecurrentStateExtractor.run): pass this for any
+    pool bigger than a small pilot -- collecting all layers for a large
+    batch x seq_len pool OOMs system RAM, not the GPU.
+
     Returns {"state": [L, N, d_inner, d_state], "final_logits": [N, V],
     "target_ids": [N]}, with the same t <-> t+1 shift as collect_states.
+    L = len(layer_subset) if given, else num_layers.
     """
     from gamma.hooks import RecurrentStateExtractor
 
@@ -70,7 +75,7 @@ def collect_recurrent_states(model, spec, tokenizer, docs: list[str], seq_len: i
     state_chunks, logit_chunks, target_chunks = [], [], []
     for i in range(0, input_ids.shape[0], batch_size):
         batch = input_ids[i : i + batch_size].to(device)
-        out = extractor.run(batch)  # state: [T, L, B, d_inner, d_state], logits: [B, T, V]
+        out = extractor.run(batch, layer_subset=layer_subset)  # state: [T, L, B, d_inner, d_state], logits: [B, T, V]
 
         state = out["state"][:-1]  # [T-1, L, B, d_inner, d_state]
         state = state.permute(1, 0, 2, 3, 4)  # [L, T-1, B, d_inner, d_state]

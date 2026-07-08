@@ -120,3 +120,86 @@ def patch_recurrent_state(
         patched_logits = run(patch_at_step=step)
 
     return PatchResult(baseline_logits=baseline_logits, patched_logits=patched_logits)
+
+
+def run_state_transplant(
+    model,
+    spec,
+    context_a_ids: torch.Tensor,  # [B, T] -- host sequence (continuation tokens are its own)
+    context_b_ids: torch.Tensor,  # [B, T] -- donor sequence (different content, same length)
+    split_point: int,
+    layer_subset: list[int] | None = None,
+) -> dict:
+    """Dissociation experiment (protocol/AMENDMENTS.md, Amendment 3).
+
+    At `split_point`, transplant the *entire* recurrent state (all
+    layer_subset layers at once) from a different context B into a
+    generation continuing on context A's own tokens. Compares three
+    conditions, all continuing the identical token sequence
+    context_a_ids[:, split_point:]:
+
+      - baseline:   unpatched, A's own state continues
+      - transplant: A's state at split_point replaced by B's (a
+                    genuinely different context's) state
+      - gaussian:   A's state at split_point replaced by mean/std-matched
+                    noise (magnitude-matched control -- same logic as the
+                    Gaussian calibration floor, applied causally)
+
+    The question isn't whether transplant changes behavior (the
+    architecture guarantees the state is causally loaded past the conv
+    window -- it's the only channel carrying information across time).
+    It's whether transplant diverges *differently* from magnitude-matched
+    noise. If not, the state's causal role is generic sensitivity to
+    perturbation, not context-specific content.
+    """
+    if spec.architecture != "mamba":
+        raise ValueError("run_state_transplant is only defined for Mamba (no transformer analog).")
+
+    from transformers.cache_utils import DynamicCache
+
+    num_layers = model.config.num_hidden_layers
+    layers = layer_subset if layer_subset is not None else list(range(num_layers))
+    continuation_ids = context_a_ids[:, split_point:]
+
+    def run_prefix(ids):
+        cache = DynamicCache(config=model.config)
+        for t in range(split_point):
+            out = model(input_ids=ids[:, t : t + 1], cache_params=cache, use_cache=True)
+            cache = out.cache_params
+        return cache
+
+    def continue_from(cache, patch_fn=None):
+        if patch_fn is not None:
+            patch_fn(cache)
+        logits_list = []
+        for t in range(continuation_ids.shape[1]):
+            out = model(input_ids=continuation_ids[:, t : t + 1], cache_params=cache, use_cache=True)
+            cache = out.cache_params
+            logits_list.append(out.logits[:, -1, :].detach())
+        return torch.stack(logits_list, dim=1)  # [B, T_cont, V]
+
+    with torch.no_grad():
+        baseline_logits = continue_from(run_prefix(context_a_ids))
+
+        cache_b = run_prefix(context_b_ids)
+        donor_states = {l: cache_b.layers[l].recurrent_states.clone() for l in layers}
+
+        def transplant_patch(cache):
+            for l in layers:
+                cache.layers[l].recurrent_states = donor_states[l].clone()
+
+        transplant_logits = continue_from(run_prefix(context_a_ids), patch_fn=transplant_patch)
+
+        def gaussian_patch(cache):
+            for l in layers:
+                real = cache.layers[l].recurrent_states
+                mean, std = real.mean(), real.std().clamp_min(1e-6)
+                cache.layers[l].recurrent_states = torch.randn_like(real) * std + mean
+
+        gaussian_logits = continue_from(run_prefix(context_a_ids), patch_fn=gaussian_patch)
+
+    return {
+        "baseline_logits": baseline_logits.cpu(),
+        "transplant_logits": transplant_logits.cpu(),
+        "gaussian_logits": gaussian_logits.cpu(),
+    }

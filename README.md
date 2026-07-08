@@ -26,6 +26,16 @@ the stream-path finding survives the floor by 1-4 orders of magnitude;
 the genuine recurrent state shows **no signal above the floor at pilot
 scale** — an open, unresolved question for Phase 1, not a quiet win.
 
+**Phase 1 kickoff:** [`reports/phase1_kickoff_report.md`](reports/phase1_kickoff_report.md)
+resolves the pilot's budget confound (matched-budget sweep: state stays
+flat near the floor across a 16x budget range while stream stays
+strong even at the smallest budget — real evidence, not just an
+underpowered null) and runs the pre-registered causal dissociation
+(state transplant vs. matched-magnitude noise) — which landed on
+neither pre-registered outcome: transplant is consistently *less*
+disruptive than noise, suggesting the state is structured and causally
+loaded but not vocabulary-shaped. See Amendment 3.
+
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the
 full ladder up to 7B — see Amendment 1. The dev machine has an RTX 3050

@@ -122,3 +122,112 @@ compared against and does not resolve Reading A vs. Reading B — it only
 rules out the easy version of Reading A. A properly-scaled run (full
 corpus, rank sweep, longer contexts) is required before Phase 1 treats
 state-path vocab-anchoring as established either way.
+
+---
+
+## Amendment 3 — 2026-07-08 — G1 splits into G1a/G1b; matched-budget sweep and state-transplant dissociation pre-registered
+
+**Written before the sweep runs**, per the review that prompted it:
+predictions are recorded here first so both possible headlines were named
+in advance, not fitted after seeing the result.
+
+**Section affected:** section 4.4's decision gate G1 ("does a
+vocabulary-anchored workspace band exist in pretrained SSMs"). Amendment
+2 established that "SSM" here was implicitly conflating two objects
+(stream, state). G1 as written assumes one; it needs to split into two
+sub-gates evaluated by different methods.
+
+- **G1a — stream vocab-anchoring.** Evaluated as section 4.1 already
+  specifies: depth-axis mapping, cross-architecture comparison with
+  Pythia, against the calibration floor (`gamma/controls.py`). Already
+  supported by Phase 0's retroactive floor check (Amendment 2, section
+  3a of `reports/phase0_addendum_report.md`): real signal beats both
+  floors by 1-4 orders of magnitude on both Mamba sizes. **G1a: PASS,**
+  provisionally — full section 4.1 battery still to come, but the
+  substrate question is answered.
+- **G1b — genuine-state vocab-anchoring.** Not decidable from the Phase
+  0 pilot (underpowered, section 3b of the addendum). Two further pieces
+  of evidence, both pre-registered here before running:
+
+  1. **Matched-budget scaling sweep.** Train both the stream lens and
+     `GammaLensV2State` at *identical* training-token budgets (the Phase
+     0 pilot compared a state lens trained on ~465 tokens against a
+     stream lens trained on ~6111 — different budgets, not a valid
+     comparison). Sweep budget, plot signal-above-floor (mean per-layer
+     log10(floor perplexity / real perplexity)) as a function of budget
+     for both paths.
+     - **Prediction, if state is vocab-anchored but less accessible
+       (Reading A):** the state curve is below the stream curve at every
+       budget but rises with budget — decodability was there, the pilot
+       just didn't have enough data/capacity to find it. The *gap*
+       between the curves at matched budget is itself a quantitative
+       accessibility-difference result.
+     - **Prediction, if state is not vocab-anchored (Reading B):** the
+       state curve stays flat (near zero signal-above-floor) as budget
+       increases while the stream curve climbs or stays elevated.
+     - Practical scope: the state path's O(seq_len) sequential-decoding
+       collection cost sets a lower ceiling on this machine than the
+       "500 to 500k tokens" originally proposed — this run sweeps to the
+       collection pool's practical size (documented in the run's own
+       report, not silently). Extending the upper end of the sweep is a
+       3060-tier-hardware task, not a 3050 one.
+
+  2. **State-transplant causal dissociation.** Using `gamma/patching.py`
+     (already built, smoke-tested): mid-sequence, transplant the full
+     recurrent state from a *different* context into a generation in
+     progress, and compare against (a) an unpatched baseline and (b) a
+     magnitude-matched Gaussian-noise perturbation (the same logic as
+     the Gaussian calibration floor, applied causally instead of
+     correlationally). The architecture guarantees the state is
+     *causally* loaded past the conv window (it's the only channel
+     carrying information across time in a Mamba block) — this is not
+     in question. What's in question is whether that causal load is
+     content specific to the source context (transplant diverges
+     differently from noise-matched perturbation) or just generic
+     sensitivity to any large perturbation (transplant and noise
+     diverge similarly).
+     - **Dissociation result, if it obtains:** state is causally potent
+       (transplant meaningfully redirects generation) while remaining
+       vocab-illegible at matched probe budget (G1b fails while the
+       causal test succeeds). This is the strong result: causally
+       load-bearing content in a non-vocabulary code. It would mean the
+       transformer paper's workspace and Mamba's persistent state are
+       different kinds of object — vocab-anchored and per-token in the
+       stream; persistent and non-linguistic in the state.
+
+**Consequence for section 6 (the interoceptive loop) if G1b fails while
+the causal test succeeds:** the loop's current design assumes the
+state's native tongue is tokens. If it isn't, the loop's readout must
+either tap the stream at the workspace band instead of the state, or use
+a trained translator on the state for the loop itself — which
+reintroduces the interpretability tax that motivated reading the state
+directly in the first place. That choice belongs in Phase 3's design,
+made deliberately, not inherited silently from an assumption G1b would
+have falsified.
+
+**Outcome (2026-07-08, full numbers in `reports/phase1_kickoff_report.md`):**
+
+- **Matched-budget sweep:** matches the Reading-B prediction. Stream
+  signal-above-floor is strong (1.9-2.3) at every budget from 500 to
+  7900 tokens, including the smallest. State signal-above-floor stays
+  flat and near zero (0.18-0.31) across the same 16x budget range —
+  no rising trend. Within the range tested, this is real evidence
+  against "state is vocab-anchored but data-starved," not merely an
+  underpowered null.
+- **State-transplant dissociation: neither pre-registered outcome.**
+  Transplant from a real, different context was *less* disruptive than
+  magnitude-matched Gaussian noise in 30/30 pairs, at every continuation
+  step (mean KL 0.084 vs. 0.474) — not the predicted "transplant >
+  noise" (content-specific dissociation) and not "transplant ≈ noise"
+  (generic sensitivity) either. Read plainly: the state is confirmed
+  causally loaded (transplant is not a no-op) and has learned,
+  non-arbitrary structure distinguishable from noise of the same
+  magnitude — real states from any context are gentler to swap in than
+  noise is. Combined with the sweep, the state looks structured and
+  causally load-bearing but not vocabulary-shaped, which is a more
+  specific claim than either forecast alone. **G1a: PASS. G1b: fails to
+  clear the floor at tested scale, alongside independent evidence the
+  state is nonetheless real and structured** — not silent, not
+  vocabulary-legible. See the kickoff report for what would sharpen this
+  further (relatedness-controlled transplant pairs) before leaning on it
+  more than that.
