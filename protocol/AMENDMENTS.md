@@ -231,3 +231,16 @@ have falsified.
   vocabulary-legible. See the kickoff report for what would sharpen this
   further (relatedness-controlled transplant pairs) before leaning on it
   more than that.
+
+---
+
+## Amendment 4 — 2026-07-08 — Transplant Triangulation & State-Manifold Analysis
+
+Filed as its own document, per instruction, rather than as a section
+here: **`protocol/AMENDMENT_4.md`**. Pre-registers a six-condition
+transplant experiment, a state-corpus manifold measurement (PCA,
+participation ratio), and an on-manifold-noise condition, testing
+whether the state's causal potency (Amendment 3) is dominated by
+manifold membership ("syntax") rather than context-specific content.
+Predictions P-A4-1/2/3 and full mechanics are in that file. Tagged
+`pre-registration-v4`.
