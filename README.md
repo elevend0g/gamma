@@ -26,6 +26,14 @@ the stream-path finding survives the floor by 1-4 orders of magnitude;
 the genuine recurrent state shows **no signal above the floor at pilot
 scale** — an open, unresolved question for Phase 1, not a quiet win.
 
+**Errata (same report, section 6):** a later plot audit caught two more
+bugs — (1) the Mamba-vs-Pythia comparison used Mamba's mixer output
+against Pythia's residual stream (different objects; fixed, Mamba's
+residual-stream V2 now converges at the final layer like Pythia's does)
+and (2) V1 perplexity was silently clamped to a ~1e13 ceiling
+(`exp(clamp(nll, max=30))`), flattening ~20 layers of every Mamba V1
+curve. Both fixed and rerun; before/after numbers listed in the erratum.
+
 **Phase 1 kickoff:** [`reports/phase1_kickoff_report.md`](reports/phase1_kickoff_report.md)
 resolves the pilot's budget confound (matched-budget sweep: state stays
 flat across a 16x budget range while stream climbs/stays strong even at

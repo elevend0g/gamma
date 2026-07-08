@@ -96,6 +96,23 @@ def collect_recurrent_states(model, spec, tokenizer, docs: list[str], seq_len: i
     }
 
 
+def _safe_exp(x: float) -> float:
+    """math.exp with double precision (safe to ~709) instead of silently
+    clamping the input -- a clamp-before-exp turns "very badly calibrated"
+    and "well calibrated" into the same reported number once the clamp is
+    saturated, which is exactly the Task 2 bug this replaces (Amendment 4
+    revision, protocol/AMENDMENT_4.md): ppl was computed as
+    exp(clamp(nll, max=30)), pinning any nll > 30 to exp(30) ~ 1.07e13
+    regardless of true magnitude. nll itself never needs clamping -- it's
+    already the well-behaved, always-finite log-domain quantity."""
+    import math
+
+    try:
+        return math.exp(x)
+    except OverflowError:
+        return float("inf")
+
+
 def layer_metrics(lens_logits: torch.Tensor, final_logits: torch.Tensor, target_ids: torch.Tensor) -> dict:
     logp_lens = F.log_softmax(lens_logits, dim=-1)
     p_lens = logp_lens.exp()
@@ -105,8 +122,39 @@ def layer_metrics(lens_logits: torch.Tensor, final_logits: torch.Tensor, target_
     top1_agree = (lens_logits.argmax(-1) == final_logits.argmax(-1)).float().mean().item()
     entropy = -(p_lens * logp_lens).sum(-1).mean().item()
     nll = F.nll_loss(logp_lens, target_ids, reduction="mean").item()
-    ppl = float(torch.exp(torch.clamp(torch.tensor(nll), max=30.0)))
-    return {"kl": kl, "top1_agree": top1_agree, "entropy": entropy, "ppl": ppl}
+    ppl = _safe_exp(nll)
+    return {"kl": kl, "top1_agree": top1_agree, "entropy": entropy, "nll": nll, "ppl": ppl}
+
+
+def layer_metrics_with_samples(lens_logits: torch.Tensor, final_logits: torch.Tensor, target_ids: torch.Tensor) -> dict:
+    """Like layer_metrics, but also returns per-example arrays for kl,
+    top1-correct, and nll -- needed to bootstrap a CI *per layer* from a
+    single run (rather than across budgets/seeds, as elsewhere in this
+    repo). Aggregate fields match layer_metrics exactly (same
+    computation, just also keeping the per-example values instead of
+    only their means)."""
+    logp_lens = F.log_softmax(lens_logits, dim=-1)
+    p_lens = logp_lens.exp()
+    logp_final = F.log_softmax(final_logits, dim=-1)
+    p_final = logp_final.exp()
+
+    kl_per_example = (p_final * (logp_final - logp_lens)).sum(-1)  # [N]
+    top1_per_example = (lens_logits.argmax(-1) == final_logits.argmax(-1)).float()  # [N]
+    nll_per_example = -logp_lens.gather(-1, target_ids.unsqueeze(-1)).squeeze(-1)  # [N]
+    entropy = -(p_lens * logp_lens).sum(-1).mean().item()
+
+    return {
+        "kl": kl_per_example.mean().item(),
+        "top1_agree": top1_per_example.mean().item(),
+        "entropy": entropy,
+        "nll": nll_per_example.mean().item(),
+        "ppl": _safe_exp(nll_per_example.mean().item()),
+        "samples": {
+            "kl": kl_per_example.tolist(),
+            "top1": top1_per_example.tolist(),
+            "nll": nll_per_example.tolist(),
+        },
+    }
 
 
 def spearman(xs: list[float], ys: list[float]) -> float:

@@ -150,3 +150,117 @@ useful place to spend the first causal-validation pass.
   "in which object, and in what basis."
 - The interoceptive loop's current design assumes the state's native
   tongue is tokens. Section 3b is a reason not to assume that going in.
+
+## 6. Errata (2026-07-08, from a plot audit, protocol/AMENDMENT_4.md Tasks 1-2)
+
+Two bugs in the Phase 0 pipeline, found by inspecting the depth-axis
+plots directly rather than trusting the aggregate report. Both are fixed
+in `gamma/hooks.py` / `gamma/validate.py` going forward; this section
+documents what was wrong, why, and what changed, rather than silently
+correcting the earlier claims.
+
+### Erratum 1 — cross-architecture object mismatch
+
+The Phase 0 report compared Pythia's **residual stream** against
+Mamba's **mixer output** (`run_phase0_model.py`'s stream auto-selection
+always preferred `mixer_output` when available — true for Mamba, never
+true for Pythia). These are different objects: mixer output is a
+per-block *incremental contribution*, not the accumulated
+representation, and structurally cannot converge to the final logits
+the way a residual stream does. This was visible in the original
+depth-axis plots (Mamba V2 final-layer KL ~2-3, top1 ~0.3, never
+approaching Pythia's KL to 0, top1 to ~0.98) but had been read as "Mamba
+converges less cleanly than Pythia" rather than "these aren't the same
+kind of quantity."
+
+**Fix:** `gamma/hooks.py::StreamExtractor` already captured Mamba's
+residual stream (`x`, via the block-level hook — the accumulated
+representation, matching Pythia's `x`); it just wasn't being selected.
+`run_phase0_model.py` now takes `--stream {x,mixer_output}` explicitly
+instead of silently defaulting.
+
+**Retrained, same Phase 0 budget (200 docs, seq_len 64, 300 steps) on
+both Mamba sizes, residual stream:**
+
+| Model | Metric | Old (mixer_output) final layer | New (residual x) final layer | Pythia final layer (unchanged) |
+|---|---|---|---|---|
+| Mamba-130M | V1 KL | 5.542 | **0.0035** | 0.0002 |
+| Mamba-130M | V1 top1 | 0.016 | **0.955** | 0.979 |
+| Mamba-130M | V2 KL | 2.389 | **0.045** | 0.035 |
+| Mamba-130M | V2 top1 | 0.309 | **0.874** | 0.889 |
+| Mamba-370M | V1 KL | 8.919 | **0.0014** | (Pythia-410M above) |
+| Mamba-370M | V1 top1 | 0.0026 | **0.971** | |
+| Mamba-370M | V2 KL | 2.733 | **0.107** | |
+| Mamba-370M | V2 top1 | 0.292 | **0.822** | |
+
+**Validation check (as specified): passed.** Residual-stream V2 now
+converges at the final layer for both sizes, matching Pythia's pattern —
+confirming this was an object-selection bug, not a capture-point bug.
+Corrected figures: `reports/phase0/mamba-130m/depth_axis_corrected.png`,
+`reports/phase0/mamba-370m/depth_axis_corrected.png` (residual stream on
+top, mixer_output kept as a clearly labeled secondary view below it).
+Reproduce: `python scripts/run_phase0_model.py <model> --stream x
+--n-docs 200 --seq-len 64 --steps 300`, then
+`scripts/plot_phase0_corrected.py`.
+
+**Consequence:** every claim in this repo comparing "Mamba vs. Pythia"
+depth-axis behavior (Phase 0's original validation report, this
+addendum's own framing above) implicitly rested on the mismatched
+comparison. The stream-vs-stream (`x`-vs-`x`) comparison is the valid
+one going forward. This does not change section 5's G1a verdict (stream
+vocab-anchoring) — G1a was never about cross-architecture parity, and
+the mixer_output/x distinction was already correctly maintained
+elsewhere (Amendment 2's stream/state split, the calibration-floor and
+matched-budget-sweep work, all of which used `mixer_output` deliberately
+and labeled it as such). It specifically corrects the *Mamba-vs-Pythia*
+framing implied by the original validation report's side-by-side plots.
+
+### Erratum 2 — V1 perplexity saturation
+
+`gamma/validate.py::layer_metrics` computed
+`ppl = exp(clamp(nll, max=30))` — a defensive clamp against float32
+overflow that instead silently pinned every `ppl` value to
+`exp(30) ≈ 1.07e13` whenever the true NLL exceeded 30. This produced the
+"flat ceiling" visible across ~20 layers of every Mamba V1 ppl curve
+(V1's zero-shot projection is badly calibrated on early layers,
+especially on `mixer_output`, which isn't in a basis the frozen
+final-norm/unembedding were fit to expect) and masked real variation.
+
+**Fix:** removed the clamp; `ppl` is now computed via `math.exp` at
+double precision (safe to ~exp(709)), with `nll` itself also reported
+directly as an always-finite, uncapped field. See
+`gamma/validate.py::_safe_exp`.
+
+**Every previously-clamped number changes** (any `ppl` reported as
+exactly `~1.069e13` in a V1 row was hitting the ceiling, not measuring
+anything at that layer). Representative before/after, Mamba V1
+mixer_output ppl (`old` = originally committed `metrics.json`, `new` =
+rerun with the fix):
+
+| Model | Layer | Old (clamped) | New (true value) |
+|---|---|---|---|
+| Mamba-130M | 0 | 1.069e13 | 1.236e50 |
+| Mamba-130M | 4 | 1.069e13 | 9.410e15 |
+| Mamba-130M | 8 | 1.069e13 | 9.219e16 |
+| Mamba-130M | 12 | 1.069e13 | 4.465e16 |
+| Mamba-130M | 16 | 1.069e13 | 1.962e16 |
+| Mamba-130M | 20 | 1.069e13 | 2.321e51 |
+| Mamba-370M | 0 | 1.069e13 | 4.173e86 |
+
+(Mamba-370M layers 8, 16, 24, 32, 40 were below the clamp threshold and
+are unchanged — listed in the reproduction output, not repeated here.)
+
+**Confirmed isolated:** grepped the codebase for other `exp()`/`clamp`
+uses (`gamma/patching.py`, `gamma/lens.py`, `gamma/controls.py`) — all
+other instances are `logp.exp()` (bounded in [0,1], can't overflow) or
+`clamp_min` guards against division by zero, unrelated to this bug.
+`kl`, `top1_agree`, and `entropy` never flowed through the clamped path
+and are unaffected. Lens *training* uses KL directly as its loss (not
+`layer_metrics`), so trained lens weights from before this fix remain
+valid — only the *reported ppl metric* was wrong, not what was learned.
+The stream/state matched-budget sweep and calibration-floor work
+(reports/phase1_kickoff_report.md, reports/phase1_sweep_metric_reanalysis.md)
+used `kl` and `top1_agree` as their primary metrics, not `ppl` — those
+findings are unaffected by this bug specifically (though see section 6's
+note above on Erratum 1's object-mismatch, which doesn't apply to the
+Mamba-only sweep either, since it never compared against Pythia).

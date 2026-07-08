@@ -2,5 +2,7 @@
 cache_hf/
 __pycache__/
 *.pyc
-reports/phase0/*/lens_v2.pt
+reports/phase0/*/lens_v2*.pt
+reports/**/lens_v2*.pt
+reports/**/*.pt
 .claude/

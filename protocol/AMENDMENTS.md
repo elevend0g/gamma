@@ -259,3 +259,21 @@ whether the state's causal potency (Amendment 3) is dominated by
 manifold membership ("syntax") rather than context-specific content.
 Predictions P-A4-1/2/3 and full mechanics are in that file. Tagged
 `pre-registration-v4`.
+
+**Revision 1 (2026-07-08, same day, tag `pre-registration-v4-r2`):** a
+plot audit surfaced two Phase 0 bugs (cross-architecture object
+mismatch — Mamba mixer_output vs. Pythia residual; V1 perplexity
+silently clamped to ~1e13) and prompted a per-layer re-slice of the
+original state-legibility pilot, all fixed/re-run before this revision
+(see `reports/phase0_addendum_report.md` section 6,
+`reports/state_legibility_reslice.md`). The re-slice found real,
+CI-supported top1-above-floor signal at 18/24 layers — not 5/24 as
+originally reported — but flat with depth, not concentrated in an upper
+band as had been assumed. Amendment 4 revision 1 adds P-A4-4 (testing
+depth-localization on the larger Task 6/7 corpus, explicitly flagged as
+running against what the pilot data already shows), an interpretive
+note on P-A4-1, a project-wide standing rule (KL and top-1 always
+reported separately, never a perplexity-only aggregate first — the
+mechanism behind both metric-masking corrections this project has now
+made), and a margin note on the interoceptive loop's readout shape. Full
+text and reasoning in `protocol/AMENDMENT_4.md`.

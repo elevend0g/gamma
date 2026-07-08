@@ -41,6 +41,13 @@ def main():
     ap.add_argument("--seq-len", type=int, default=64)
     ap.add_argument("--n-docs", type=int, default=128)
     ap.add_argument("--steps", type=int, default=300)
+    ap.add_argument("--stream", choices=["x", "mixer_output"], default=None,
+                     help="Force which captured quantity to lens. Default auto-picks "
+                          "mixer_output for Mamba, x for Pythia -- which is exactly the "
+                          "cross-architecture object mismatch protocol/AMENDMENT_4.md's "
+                          "Task 1 fixes: for a Mamba-vs-Pythia comparison, pass --stream x "
+                          "explicitly on both so the compared object is the same "
+                          "(residual stream), not mixer_output-vs-residual.")
     args = ap.parse_args()
 
     out_dir = f"/home/jay/gamma/reports/phase0/{args.model_name}"
@@ -59,7 +66,12 @@ def main():
     print(f"[{args.model_name}] state collection done in {time.time()-t0:.1f}s "
           f"(train N={train_data['final_logits'].shape[0]}, eval N={eval_data['final_logits'].shape[0]})")
 
-    stream = "mixer_output" if "mixer_output" in train_data else "x"
+    if args.stream is not None:
+        if args.stream not in train_data:
+            raise ValueError(f"--stream {args.stream} not captured for this architecture (have: {list(train_data.keys())})")
+        stream = args.stream
+    else:
+        stream = "mixer_output" if "mixer_output" in train_data else "x"
     num_layers, _, hidden_size = train_data[stream].shape
     print(f"[{args.model_name}] primary stream={stream}, layers={num_layers}, hidden={hidden_size}")
 
