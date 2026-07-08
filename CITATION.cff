@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it as below."
+title: "Project Gamma: Closed-Loop Architectural Proprioception in Pretrained State-Space Models"
+type: software
+authors:
+  - name: "Jay"
+    email: jay@elevendog.com
+    alias: elevend0g
+repository-code: "https://github.com/elevend0g/gamma"
+url: "https://github.com/elevend0g/gamma"
+license: MIT
+version: "phase0"
+date-released: 2026-07-08
+keywords:
+  - interpretability
+  - state-space-models
+  - mamba
+  - mechanistic-interpretability
+  - tuned-lens

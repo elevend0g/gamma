@@ -50,7 +50,7 @@ def main():
     print(f"[{args.model_name}] state collection done in {time.time()-t0:.1f}s "
           f"(train N={train_data['final_logits'].shape[0]}, eval N={eval_data['final_logits'].shape[0]})")
 
-    stream = "h" if "h" in train_data else "x"
+    stream = "mixer_output" if "mixer_output" in train_data else "x"
     num_layers, _, hidden_size = train_data[stream].shape
     print(f"[{args.model_name}] primary stream={stream}, layers={num_layers}, hidden={hidden_size}")
 

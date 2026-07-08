@@ -3,7 +3,7 @@
 import torch
 import torch.nn.functional as F
 
-from gamma.hooks import StateExtractor
+from gamma.hooks import StreamExtractor
 
 
 def tokenize_fixed_len(tokenizer, docs: list[str], seq_len: int) -> torch.Tensor:
@@ -26,17 +26,17 @@ def collect_states(model, spec, tokenizer, docs: list[str], seq_len: int = 64, b
     and next-token-perplexity metrics need.
     """
     input_ids = tokenize_fixed_len(tokenizer, docs, seq_len)
-    extractor = StateExtractor(model, spec)
-    x_chunks, h_chunks, logit_chunks = [], [], []
+    extractor = StreamExtractor(model, spec)
+    x_chunks, mixer_chunks, logit_chunks = [], [], []
     try:
         for i in range(0, input_ids.shape[0], batch_size):
             batch = input_ids[i : i + batch_size].to(device)
             out = extractor.run(batch)
             x = out["x"][:, :, :-1, :]  # [L, B, T-1, H]
             x_chunks.append(x.reshape(x.shape[0], -1, x.shape[-1]).float().cpu())
-            if "h" in out:
-                h = out["h"][:, :, :-1, :]
-                h_chunks.append(h.reshape(h.shape[0], -1, h.shape[-1]).float().cpu())
+            if "mixer_output" in out:
+                mixer_output = out["mixer_output"][:, :, :-1, :]
+                mixer_chunks.append(mixer_output.reshape(mixer_output.shape[0], -1, mixer_output.shape[-1]).float().cpu())
             logits = out["logits"][:, :-1, :]
             logit_chunks.append(logits.reshape(-1, logits.shape[-1]).float().cpu())
     finally:
@@ -47,9 +47,48 @@ def collect_states(model, spec, tokenizer, docs: list[str], seq_len: int = 64, b
         "final_logits": torch.cat(logit_chunks, dim=0),
         "target_ids": input_ids[:, 1:].reshape(-1),
     }
-    if h_chunks:
-        result["h"] = torch.cat(h_chunks, dim=1)
+    if mixer_chunks:
+        result["mixer_output"] = torch.cat(mixer_chunks, dim=1)
     return result
+
+
+@torch.no_grad()
+def collect_recurrent_states(model, spec, tokenizer, docs: list[str], seq_len: int = 48, batch_size: int = 16, device: str = "cuda") -> dict:
+    """Genuine recurrent state h_t^(l), via RecurrentStateExtractor
+    (step-by-step cached decoding -- see gamma/hooks.py). Slower than
+    collect_states by construction: O(seq_len) forward calls per batch of
+    documents instead of one batched call.
+
+    Returns {"state": [L, N, d_inner, d_state], "final_logits": [N, V],
+    "target_ids": [N]}, with the same t <-> t+1 shift as collect_states.
+    """
+    from gamma.hooks import RecurrentStateExtractor
+
+    input_ids = tokenize_fixed_len(tokenizer, docs, seq_len)
+    extractor = RecurrentStateExtractor(model, spec)
+
+    state_chunks, logit_chunks, target_chunks = [], [], []
+    for i in range(0, input_ids.shape[0], batch_size):
+        batch = input_ids[i : i + batch_size].to(device)
+        out = extractor.run(batch)  # state: [T, L, B, d_inner, d_state], logits: [B, T, V]
+
+        state = out["state"][:-1]  # [T-1, L, B, d_inner, d_state]
+        state = state.permute(1, 0, 2, 3, 4)  # [L, T-1, B, d_inner, d_state]
+        L = state.shape[0]
+        state = state.reshape(L, -1, state.shape[-2], state.shape[-1])  # [L, (T-1)*B, d_inner, d_state]
+        state_chunks.append(state.float())
+
+        logits = out["logits"][:, :-1, :].permute(1, 0, 2)  # [T-1, B, V]
+        logit_chunks.append(logits.reshape(-1, logits.shape[-1]).float())
+
+        target_ids = batch[:, 1:].permute(1, 0).reshape(-1)  # [(T-1)*B]
+        target_chunks.append(target_ids.cpu())
+
+    return {
+        "state": torch.cat(state_chunks, dim=1),
+        "final_logits": torch.cat(logit_chunks, dim=0),
+        "target_ids": torch.cat(target_chunks, dim=0),
+    }
 
 
 def layer_metrics(lens_logits: torch.Tensor, final_logits: torch.Tensor, target_ids: torch.Tensor) -> dict:
