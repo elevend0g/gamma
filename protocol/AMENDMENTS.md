@@ -288,3 +288,30 @@ stream: Mamba shows a wider band than Pythia at matched-ish scale
 (85-88% vs. 67% of depth). Together these close every experimentally
 addressable item from the "protocol not performed" gap analysis short
 of the actual G1 gate decision, which remains reserved.
+
+---
+
+## Gate G1 — Decision (2026-07-08)
+
+Adjudicated by the author. Full record: **`protocol/GATE_G1_DECISION.md`**.
+
+**Decision: the transformer workspace's depth-localized organization
+does not port to recurrent SSM state.** The SSM's readable signal is
+pervasive and early-peaking (85-88% of depth in Mamba, peak at layer 3
+of both 24 and 48) rather than banded and mid-network (67% in Pythia at
+matched-ish scale); the persistent state is causally real but mostly
+generic manifold membership, thinly content. P-A4-4's pre-registered
+localized-band prediction failed decisively, cleanly, in the direction
+against the registrant.
+
+Scoped explicitly: this is about the *representational* signature
+(lens-family readout), not a claim that no functional (causal,
+intervention-defined) workspace exists — that's a separate, harder,
+deferred question. Also scoped to the small tier (130M/370M) only.
+
+This is the last open item from the "protocol not performed" gap
+analysis that was experimentally addressable; everything past this
+point (whether Phases 2-5 are superseded or need re-scoping, whether
+the hybrid-pivot protocol section 4.4 specifies for a flat negative
+applies to this non-binary outcome) is downstream design work the
+decision document explicitly does not resolve.

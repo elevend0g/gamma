@@ -105,6 +105,24 @@ above 370M) is gated on a single decision — protocol §4.4's Gate G1 —
 that the project's own findings mostly already answer, and which is
 reserved for the author, not the agent.
 
+**Gate G1 — decision (2026-07-08):** adjudicated by the author; full
+record [`protocol/GATE_G1_DECISION.md`](protocol/GATE_G1_DECISION.md),
+pointer in [`protocol/AMENDMENTS.md`](protocol/AMENDMENTS.md). **The
+transformer workspace's depth-localized organization does not port to
+recurrent SSM state.** The readable signal is pervasive and
+early-peaking (85-88% of depth in Mamba, peak at layer 3 of both 24 and
+48) rather than banded and mid-network (67% in Pythia at matched-ish
+scale); P-A4-4's pre-registered localized-band prediction failed
+decisively, in the direction against the registrant; the persistent
+state is causally real but mostly generic manifold membership, thinly
+content. Scoped explicitly to the *representational* signature
+(lens-family readout) at the small tier (130M/370M) only — not a claim
+that no *functional*, causally-defined workspace exists, which is a
+separate, harder, deferred question. This is the last item from the gap
+analysis that was experimentally addressable; whether Phases 2-5 are
+superseded outright or need re-scoping is downstream design work the
+decision doesn't resolve.
+
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the
 full ladder up to 7B — see Amendment 1. The dev machine has an RTX 3050

@@ -26,15 +26,22 @@
 \todojay{Abstract. Should state: (1) the question -- does a
 vocabulary-anchored introspective workspace, found in transformers,
 exist in pretrained SSMs, and does it extend to the object that persists
-across time; (2) the two-instrument answer -- stream is vocab-anchored
-(G1a), genuine recurrent state is not (G1b), but is structured and
-causally load-bearing; (3) the headline quantitative results: thin
-saturating legibility signal, disruption law $d = k(1-\mathrm{sim})$,
-shape/content decomposition (\ShapeShareOneThreeM/\ShapeShareThreeSevenM\
-of transplant disruption is generic manifold membership, not content),
-participation ratio \ParticipationRatioMinOneThreeM--\ParticipationRatioMaxOneThreeM\
-of ambient dimension; (4) reproducibility claim -- entire study runs on
-a 4GB consumer laptop GPU.}
+across time; (2) the Gate G1 answer (protocol \S4.4, decided
+2026-07-08, \texttt{protocol/GATE\_G1\_DECISION.md}) -- no, not in the
+same form: the readable signal is pervasive and early-peaking
+(\BandWidthPctOneThreeM/\BandWidthPctThreeSevenM\ of depth, peak layer
+\PeakLayerOneThreeM) rather than banded and mid-network
+(\BandWidthPctPyFourTen\ in Pythia), and the persistent state is
+causally real but mostly generic manifold membership, thinly content --
+scoped explicitly to the representational signature, not a claim about
+functional/causal workspace existence; (3) the headline quantitative
+results: thin saturating legibility signal, disruption law
+$d = k(1-\mathrm{sim})$, shape/content decomposition
+(\ShapeShareOneThreeM/\ShapeShareThreeSevenM\ of transplant disruption
+is generic manifold membership, not content), participation ratio
+\ParticipationRatioMinOneThreeM--\ParticipationRatioMaxOneThreeM\ of
+ambient dimension; (4) reproducibility claim -- entire study runs on a
+4GB consumer laptop GPU.}
 \end{abstract}
 
 \section{Introduction}
@@ -270,15 +277,38 @@ matching the state's own native legibility shape (see Amendment 4's
 margin note) -- lucky coincidence or the same architectural floor
 showing up twice; (3) what remains open: P-A4-4's status, the
 unexplained bimodal permutation distribution, whether the shape/content
-ratio holds at larger scale (790M+, 3060-tier hardware); (4) the gate
-decision (protocol \S4.4, G1) this paper's findings bear on but do not
-themselves make: Phases 2-5 as specified are machinery for using a
-vocab-anchored workspace channel in the genuine state, and this paper's
-results (thin/saturating legibility, non-localization, mostly-form
-transplant decomposition) are evidence that channel isn't organized that
-way -- state plainly whether that means Phases 2-5 are superseded by
-this finding rather than merely unrun, since every downstream
-``not yet done'' in this project inherits its status from that one call.}
+ratio holds at larger scale (790M+, 3060-tier hardware).}
+
+\subsection*{Gate G1}
+Adjudicated 2026-07-08; full record \texttt{protocol/GATE\_G1\_DECISION.md}.
+
+The transformer workspace's depth-localized organization does not port
+to recurrent SSM state. The SSM organizes its readable signal
+differently -- pervasive and early (\BandWidthPctOneThreeM\ /
+\BandWidthPctThreeSevenM\ of depth in Mamba, peaking at layer
+\PeakLayerOneThreeM\ of \NLayersFullAboveFloorOneThreeM's denominator,
+the same absolute layer across a 2$\times$ depth difference) rather than
+banded and mid-network (\BandWidthPctPyFourTen\ in Pythia-410M at
+matched-ish scale) -- and its persistent state is a structured,
+low-dimensional, causally-potent object that is not arranged the way
+the workspace story predicted. P-A4-4's pre-registered localized-band
+prediction failed decisively, in both models, in the direction against
+the registrant.
+
+This is a claim about the *representational* signature specifically
+(lens-family readout) -- not that no workspace-like function exists in
+SSMs at all. Whether a *functional*, causally-defined workspace exists
+is a separate, harder, deliberately deferred question; representational
+prominence and causal importance are known to come apart in SSMs, and
+this project's own shape/content dissociation is one instance of that
+gap. Scoped to the small tier (130M/370M) only.
+
+\todojay{Downstream implications -- Jay's call, not resolved by the
+gate decision itself: whether protocol \S4.4's hybrid-only pivot
+(specified for a flat negative) applies to this non-binary outcome;
+whether Phases 2-5 are superseded outright or need re-scoping around
+what the state actually has (pervasive/early/thin) rather than what the
+protocol assumed (localized/banded); what runs next.}
 
 \section{Limitations}
 \todojay{
