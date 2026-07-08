@@ -1,0 +1,9 @@
+torch==2.5.1
+transformers>=5.13.0
+accelerate
+einops
+datasets
+huggingface_hub
+scipy
+numpy
+matplotlib

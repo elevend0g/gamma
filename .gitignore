@@ -1,0 +1,6 @@
+.venv/
+cache_hf/
+__pycache__/
+*.pyc
+reports/phase0/*/lens_v2.pt
+.claude/
