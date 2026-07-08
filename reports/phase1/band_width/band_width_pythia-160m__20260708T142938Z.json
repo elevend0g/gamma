@@ -1,0 +1,109 @@
+{
+  "model": "pythia-160m",
+  "num_layers": 12,
+  "window": 5,
+  "per_layer": [
+    {
+      "layer": 0,
+      "n": 5184,
+      "echo_frac": 0.08371913580246913,
+      "output_frac": 0.1440972222222222,
+      "neither_frac": 0.7721836419753086
+    },
+    {
+      "layer": 1,
+      "n": 5184,
+      "echo_frac": 0.07349537037037036,
+      "output_frac": 0.15817901234567902,
+      "neither_frac": 0.7683256172839507
+    },
+    {
+      "layer": 2,
+      "n": 5184,
+      "echo_frac": 0.06905864197530864,
+      "output_frac": 0.1726466049382716,
+      "neither_frac": 0.7582947530864198
+    },
+    {
+      "layer": 3,
+      "n": 5184,
+      "echo_frac": 0.07118055555555555,
+      "output_frac": 0.18557098765432098,
+      "neither_frac": 0.7432484567901234
+    },
+    {
+      "layer": 4,
+      "n": 5184,
+      "echo_frac": 0.06597222222222222,
+      "output_frac": 0.21141975308641975,
+      "neither_frac": 0.722608024691358
+    },
+    {
+      "layer": 5,
+      "n": 5184,
+      "echo_frac": 0.07195216049382716,
+      "output_frac": 0.24131944444444445,
+      "neither_frac": 0.6867283950617284
+    },
+    {
+      "layer": 6,
+      "n": 5184,
+      "echo_frac": 0.07542438271604938,
+      "output_frac": 0.2536651234567901,
+      "neither_frac": 0.6709104938271605
+    },
+    {
+      "layer": 7,
+      "n": 5184,
+      "echo_frac": 0.08545524691358025,
+      "output_frac": 0.27411265432098764,
+      "neither_frac": 0.6404320987654321
+    },
+    {
+      "layer": 8,
+      "n": 5184,
+      "echo_frac": 0.08314043209876543,
+      "output_frac": 0.30690586419753085,
+      "neither_frac": 0.6099537037037037
+    },
+    {
+      "layer": 9,
+      "n": 5184,
+      "echo_frac": 0.08545524691358025,
+      "output_frac": 0.3244598765432099,
+      "neither_frac": 0.5900848765432098
+    },
+    {
+      "layer": 10,
+      "n": 5184,
+      "echo_frac": 0.08989197530864197,
+      "output_frac": 0.4052854938271605,
+      "neither_frac": 0.5048225308641975
+    },
+    {
+      "layer": 11,
+      "n": 5184,
+      "echo_frac": 0.07310956790123457,
+      "output_frac": 0.3705632716049383,
+      "neither_frac": 0.5563271604938271
+    }
+  ],
+  "band_start": 0,
+  "band_end": 11,
+  "band_width_layers": 12,
+  "band_width_frac": 1.0,
+  "per_layer_neither_plurality": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ]
+}

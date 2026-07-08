@@ -126,3 +126,22 @@ Every number cited in `paper/main.tex` is a LaTeX macro defined in
 directly from the report JSON files above — never hand-typed into the
 manuscript. Rerun the extraction script after any upstream experiment
 change, then recompile.
+
+## What was scoped out, and why
+
+The protocol (`protocol/gamma_protocol.md`) specifies five phases; this
+paper covers Phase 0 and part of Phase 1. Phases 2-5 (behavioral
+battery, interoceptive loop, loop training, the bridge experiment) were
+not attempted, and the `gamma/judge.py` κ-validation gate (Phase 0 §3.3
+prerequisite for Phase 2's judged battery) was never run — no
+`OPENROUTER_API_KEY`, no 100 human-labeled transcripts. This is not
+debt against an unfinished plan: Phases 2-5 are machinery for *using* a
+vocab-anchored, workspace-like channel in the genuine recurrent state,
+and this project's own findings (thin, saturating stream legibility;
+P-A4-4's falsification of state-side depth-localization; "mostly form,
+thinly content" from the transplant decomposition) are evidence that
+channel isn't organized the way those phases assume. Whether that
+means Phases 2-5 are superseded rather than merely pending is a gate
+decision (protocol §4.4, G1) reserved for the author, not something
+resolved by running more of the original plan for its own sake. See
+`gamma/judge.py`'s module docstring for the same point stated in code.

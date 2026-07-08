@@ -2,12 +2,22 @@
 
 Behavioral outputs in later phases (2, 3, 5, 6) are scored by a frontier
 model via OpenRouter against a fixed rubric. This module builds the
-plumbing now, as Phase 0 requires, but the kappa-validation step ("hand-
+plumbing, as Phase 0 requires, but the kappa-validation step ("hand-
 validate the judge against 100 human-labeled transcripts, target Cohen's
-kappa >= 0.75") is deferred: there is no behavioral transcript data yet
-(that's a Phase 2 battery output) and no OPENROUTER_API_KEY is configured
-in this environment. Do not trust this judge for real scoring decisions
-until that validation has been run.
+kappa >= 0.75") has not been run.
+
+This is not open debt accumulating against a plan -- it's a prerequisite
+for Phase 2's behavioral battery specifically, and Phase 2 has not been
+reached. The project's findings so far (G1a: stream is vocab-anchored
+but its legible content is thin; G1b/P-A4-4: the genuine state's
+legibility floor is pervasive and early-peaking, not a depth-localized
+workspace band; "mostly form, thinly content" from the transplant work)
+argue that Phases 2-5 as specified -- all of which are machinery for
+*using* a workspace-like channel the data doesn't show the state having
+-- may be superseded rather than merely delayed. Whether that's the
+right call is a gate decision (protocol section 4.4, G1), not something
+this module can determine. Built, not validated, because the phase it
+gates was not reached: that's the honest status, not a loose end.
 """
 
 import json

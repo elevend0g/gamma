@@ -1,0 +1,205 @@
+{
+  "model": "mamba-130m",
+  "num_layers": 24,
+  "window": 5,
+  "per_layer": [
+    {
+      "layer": 0,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.12962962962962962,
+      "neither_frac": 0.8074074074074075
+    },
+    {
+      "layer": 1,
+      "n": 270,
+      "echo_frac": 0.05185185185185185,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.8111111111111111
+    },
+    {
+      "layer": 2,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.11481481481481481,
+      "neither_frac": 0.8222222222222222
+    },
+    {
+      "layer": 3,
+      "n": 270,
+      "echo_frac": 0.08148148148148149,
+      "output_frac": 0.11851851851851852,
+      "neither_frac": 0.8
+    },
+    {
+      "layer": 4,
+      "n": 270,
+      "echo_frac": 0.06666666666666667,
+      "output_frac": 0.14074074074074075,
+      "neither_frac": 0.7925925925925926
+    },
+    {
+      "layer": 5,
+      "n": 270,
+      "echo_frac": 0.06666666666666667,
+      "output_frac": 0.14444444444444443,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 6,
+      "n": 270,
+      "echo_frac": 0.05925925925925926,
+      "output_frac": 0.1259259259259259,
+      "neither_frac": 0.8148148148148148
+    },
+    {
+      "layer": 7,
+      "n": 270,
+      "echo_frac": 0.05555555555555555,
+      "output_frac": 0.14074074074074075,
+      "neither_frac": 0.8037037037037037
+    },
+    {
+      "layer": 8,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.14074074074074075,
+      "neither_frac": 0.7962962962962963
+    },
+    {
+      "layer": 9,
+      "n": 270,
+      "echo_frac": 0.06666666666666667,
+      "output_frac": 0.14444444444444443,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 10,
+      "n": 270,
+      "echo_frac": 0.05555555555555555,
+      "output_frac": 0.15555555555555556,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 11,
+      "n": 270,
+      "echo_frac": 0.05925925925925926,
+      "output_frac": 0.14074074074074075,
+      "neither_frac": 0.8
+    },
+    {
+      "layer": 12,
+      "n": 270,
+      "echo_frac": 0.07407407407407407,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 13,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.13333333333333333,
+      "neither_frac": 0.8037037037037037
+    },
+    {
+      "layer": 14,
+      "n": 270,
+      "echo_frac": 0.07407407407407407,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 15,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.8
+    },
+    {
+      "layer": 16,
+      "n": 270,
+      "echo_frac": 0.07037037037037037,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.7925925925925926
+    },
+    {
+      "layer": 17,
+      "n": 270,
+      "echo_frac": 0.06666666666666667,
+      "output_frac": 0.13703703703703704,
+      "neither_frac": 0.7962962962962963
+    },
+    {
+      "layer": 18,
+      "n": 270,
+      "echo_frac": 0.07037037037037037,
+      "output_frac": 0.14074074074074075,
+      "neither_frac": 0.7888888888888889
+    },
+    {
+      "layer": 19,
+      "n": 270,
+      "echo_frac": 0.06296296296296296,
+      "output_frac": 0.13333333333333333,
+      "neither_frac": 0.8037037037037037
+    },
+    {
+      "layer": 20,
+      "n": 270,
+      "echo_frac": 0.07037037037037037,
+      "output_frac": 0.1111111111111111,
+      "neither_frac": 0.8185185185185185
+    },
+    {
+      "layer": 21,
+      "n": 270,
+      "echo_frac": 0.07407407407407407,
+      "output_frac": 0.1111111111111111,
+      "neither_frac": 0.8148148148148148
+    },
+    {
+      "layer": 22,
+      "n": 270,
+      "echo_frac": 0.07407407407407407,
+      "output_frac": 0.12962962962962962,
+      "neither_frac": 0.7962962962962963
+    },
+    {
+      "layer": 23,
+      "n": 270,
+      "echo_frac": 0.06666666666666667,
+      "output_frac": 0.12962962962962962,
+      "neither_frac": 0.8037037037037037
+    }
+  ],
+  "band_start": 0,
+  "band_end": 23,
+  "band_width_layers": 24,
+  "band_width_frac": 1.0,
+  "per_layer_neither_plurality": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ]
+}

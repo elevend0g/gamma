@@ -277,3 +277,14 @@ reported separately, never a perplexity-only aggregate first — the
 mechanism behind both metric-masking corrections this project has now
 made), and a margin note on the interoceptive loop's readout shape. Full
 text and reasoning in `protocol/AMENDMENT_4.md`.
+
+**Closeout (2026-07-08, same file):** P-A4-4 run at full scale — FAILED
+decisively, both models (signal pervasive at 87.5%/83.3% of layers,
+depth trend negative, peak layer 3 of 24 and 3 of 48). Echo-partialling
+confirmed the legible signal isn't primarily input echo. The
+input-echo/output-prediction/neither band-width decomposition
+(protocol section 4.1.1-2, previously unrun) was computed for the
+stream: Mamba shows a wider band than Pythia at matched-ish scale
+(85-88% vs. 67% of depth). Together these close every experimentally
+addressable item from the "protocol not performed" gap analysis short
+of the actual G1 gate decision, which remains reserved.

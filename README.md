@@ -89,6 +89,22 @@ approximation. A LaTeX preprint scaffold assembling all of this
 (structure and sourced numbers only, no agent-authored interpretation)
 lives in [`paper/`](paper/main.tex); see [`paper/reproducibility.md`](paper/reproducibility.md).
 
+**Phase 1 closeout:** two more follow-ups closed out the experimentally
+addressable items from a full protocol gap analysis. (1) [`reports/phase1/echo_partialling.md`](reports/phase1/echo_partialling.md) —
+does P-A4-4's early-peaked legibility signal survive removing every case
+where the answer was trivially visible in the prompt? Yes, at ~85-86%
+of its full magnitude, both sizes — not primarily an echo artifact.
+(2) [`reports/phase1/band_width.md`](reports/phase1/band_width.md) —
+the protocol's own input-echo/output-prediction/neither band-width
+methodology (section 4.1.1-2), previously unrun, applied to the stream:
+Mamba shows a markedly wider band (85-88% of depth) than Pythia-410M
+(67%), turning the qualitative G1a result into its quantitative form.
+Everything else in the original protocol not yet performed (Phases 2-5,
+the time-axis regime taxonomy, the capacity probe, the checkpoint ladder
+above 370M) is gated on a single decision — protocol §4.4's Gate G1 —
+that the project's own findings mostly already answer, and which is
+reserved for the author, not the agent.
+
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the
 full ladder up to 7B — see Amendment 1. The dev machine has an RTX 3050

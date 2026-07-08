@@ -105,6 +105,32 @@ matching Pythia's pattern.}
   \caption{\todojay{Caption: corrected residual-stream depth-axis comparison, both Mamba sizes.}}
 \end{figure}
 
+\todojay{\textbf{Band width, quantified} (protocol section 4.1.1--2's
+input-echo/output-prediction/neither decomposition, applied to the
+stream -- reused the already-trained corrected lenses, no retraining).
+Band width: Mamba-130M \BandWidthPctOneThreeM\ of depth
+(\BandWidthLayersOneThreeM), Mamba-370M \BandWidthPctThreeSevenM\
+(\BandWidthLayersThreeSevenM), Pythia-410M \BandWidthPctPyFourTen\
+(\BandWidthLayersPyFourTen). State the cross-architecture comparison
+plainly: both Mamba sizes show a *wider* band than Pythia-410M at
+matched-ish scale, and note this is reported as the pattern found, not
+further interpreted (could be architectural, could be V2-calibration
+difference). Pythia-160M's \BandWidthPctPyOneSixty\ figure is a ceiling
+effect from weak lens convergence at that size (final-layer top1\_agree
+only 0.399), not a genuinely wider band -- flag this caveat explicitly,
+do not present the four numbers as uniformly comparable. Echo stays
+flat and low (5-9\%) at every layer, every model -- the stream is never
+mostly copying recent context. See
+\texttt{reports/phase1/band\_width.md} for the methodology correction
+made before trusting this (an initial version compared against
+ground-truth continuation text rather than the model's own future
+prediction, and was caught by a sanity check before being reported).}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/band_width_plot.png}
+  \caption{\todojay{Caption: echo/output-prediction/neither fractions by layer, all four models, band shaded.}}
+\end{figure}
+
 \subsection{State legibility: thin, pervasive, and early-peaking, not depth-localized}
 \label{sec:legibility}
 \todojay{P-A4-4 (depth-localization of the state's argmax-legible
@@ -244,7 +270,15 @@ matching the state's own native legibility shape (see Amendment 4's
 margin note) -- lucky coincidence or the same architectural floor
 showing up twice; (3) what remains open: P-A4-4's status, the
 unexplained bimodal permutation distribution, whether the shape/content
-ratio holds at larger scale (790M+, 3060-tier hardware).}
+ratio holds at larger scale (790M+, 3060-tier hardware); (4) the gate
+decision (protocol \S4.4, G1) this paper's findings bear on but do not
+themselves make: Phases 2-5 as specified are machinery for using a
+vocab-anchored workspace channel in the genuine state, and this paper's
+results (thin/saturating legibility, non-localization, mostly-form
+transplant decomposition) are evidence that channel isn't organized that
+way -- state plainly whether that means Phases 2-5 are superseded by
+this finding rather than merely unrun, since every downstream
+``not yet done'' in this project inherits its status from that one call.}
 
 \section{Limitations}
 \todojay{

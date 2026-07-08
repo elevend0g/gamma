@@ -396,3 +396,35 @@ the standing project norm.
   property, though it does not change P-A4-4's own already-settled
   verdict (FAILED — the signal is pervasive and early-peaking, not
   depth-localized, regardless of its echo status).
+
+**Stream band-width, quantified (2026-07-08), full report `reports/phase1/band_width.md`:**
+protocol section 4.1.1-2's input-echo/output-prediction/neither
+decomposition, applied to the stream (not the state — a distinct
+question from the echo-partialling above), reusing already-trained
+corrected residual-stream lenses (no retraining). One methodology bug
+caught before trusting the result: an initial version compared lens
+predictions against the *actual written continuation* of held-out text
+rather than the model's own future top-1 prediction, which confounds
+genuine anticipation with token-frequency (common words recur in
+nearby text regardless of any real computation) — it showed ~40-45%
+"output-match" even at layer 0, contradicting everything else this
+project has found about early layers, which is what flagged it as
+wrong rather than reportable. Fixed to compare same-position agreement
+with the model's own true final-layer prediction (what `top1_agree`
+already measures, done here per-example).
+
+Band width: Mamba-130M 87.5% of depth (21/24), Mamba-370M 85.4%
+(41/48), Pythia-410M 66.7% (16/24). **Both Mamba sizes show a
+distinctly wider band than Pythia-410M** — reported as the pattern
+found, not further interpreted (architectural vs. lens-calibration
+difference not distinguished by this data). Pythia-160M's nominal 100%
+is a ceiling effect from weak lens convergence at that size (final
+top1_agree only 0.399), not a genuinely wider band — flagged explicitly,
+not presented as comparable to the other three. Echo stays flat and low
+(5-9%) at every layer, every model — the stream is never mostly copying
+recent context, at any depth, either architecture.
+
+This directly answers a standing gap from the protocol's own §4.1.2
+("report band location and width as a fraction of depth") that had
+been open since Phase 1 began — G1a ("stream is vocab-anchored") now
+has its quantitative form, not just a qualitative convergence curve.
