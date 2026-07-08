@@ -28,13 +28,17 @@ scale** — an open, unresolved question for Phase 1, not a quiet win.
 
 **Phase 1 kickoff:** [`reports/phase1_kickoff_report.md`](reports/phase1_kickoff_report.md)
 resolves the pilot's budget confound (matched-budget sweep: state stays
-flat near the floor across a 16x budget range while stream stays
-strong even at the smallest budget — real evidence, not just an
-underpowered null) and runs the pre-registered causal dissociation
+flat across a 16x budget range while stream climbs/stays strong even at
+the smallest budget) and runs the pre-registered causal dissociation
 (state transplant vs. matched-magnitude noise) — which landed on
 neither pre-registered outcome: transplant is consistently *less*
 disruptive than noise, suggesting the state is structured and causally
-loaded but not vocabulary-shaped. See Amendment 3.
+loaded but not vocabulary-shaped. **Correction:**
+[`reports/phase1_sweep_metric_reanalysis.md`](reports/phase1_sweep_metric_reanalysis.md)
+found the sweep's "near-floor" characterization was a perplexity-only
+artifact — separated by metric, the state path has a real (not zero),
+small, budget-flat top1/KL signal above floor, ~3-7x weaker than
+stream's. See Amendment 3.
 
 **Scope note:** this build targets the 130M-370M tier of the protocol's
 checkpoint matrix (Mamba-130M/370M vs. Pythia-160M/410M) rather than the

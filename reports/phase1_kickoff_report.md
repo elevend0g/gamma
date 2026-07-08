@@ -8,6 +8,16 @@ result didn't match either predicted pattern.
 
 ## 1. Matched-budget scaling sweep
 
+**Correction, same day:** the "signal-above-floor" number below is a
+perplexity-only aggregate. A metric-separated re-analysis
+(`reports/phase1_sweep_metric_reanalysis.md`) found perplexity was
+masking a real, statistically robust top1_agree/KL signal in the state
+path (small — ~3-7x weaker than stream's — and still flat with budget,
+but not "near zero" as characterized below). Read that report alongside
+this section before treating "state shows no signal" as settled; the
+comparative ordering and flat shape both hold, the "no signal"
+characterization specifically doesn't.
+
 Fixes the Phase 0 pilot's invalid comparison (state lens trained on
 ~465 tokens vs. stream lens on ~6111 — different budgets). Both lenses
 now trained at *identical* budgets: 500, 1000, 2000, 4000, 7900 tokens,

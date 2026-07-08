@@ -232,6 +232,21 @@ have falsified.
   further (relatedness-controlled transplant pairs) before leaning on it
   more than that.
 
+**Correction (2026-07-08, same day, `reports/phase1_sweep_metric_reanalysis.md`):**
+"signal-above-floor... near zero" above is a perplexity-only aggregate
+and overstates the null. Re-analyzed with top1_agree and KL kept
+separate (not run as a new experiment — same data): excluding a
+degenerate layer 0 (both paths show ~zero signal there), the state path
+has a **real, tight-CI signal above floor** in both top1_agree
+(+0.050, 95% CI [+0.046, +0.055], n=20) and KL (+0.75, CI [+0.56, +0.97]),
+flat across the budget range, roughly 3-7x smaller than the stream
+path's. Corrected claim: not "no signal," but "a real, small,
+budget-flat signal, smaller than stream's by every metric checked." The
+comparative ordering (stream >> state) and the flat-with-budget shape
+both hold up; only the "near zero" / "no signal" characterization of the
+state result needed fixing. G1b still not resolved by this — see that
+report's "what this does and doesn't change" section.
+
 ---
 
 ## Amendment 4 — 2026-07-08 — Transplant Triangulation & State-Manifold Analysis
